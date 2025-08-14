@@ -1,0 +1,12 @@
+{{> header}}
+<h1>Productos</h1>
+<ul>
+{{#each products}}
+    <li>
+        <strong>{{this.title}}</strong> - ${{this.price}}<br>
+        {{this.description}}<br>
+        <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" width="100">
+    </li>
+{{/each}}
+</ul>
+<a href="/products/new">Agregar nuevo producto</a>
