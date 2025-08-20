@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": 1,
+    "title": "Remera",
+    "description": "Remera de algodón",
+    "code": "REM123",
+    "price": 1200,
+    "status": true,
+    "stock": 10,
+    "category": "Ropa",
+    "thumbnails": []
+  }
+]

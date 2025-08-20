@@ -1,44 +1,56 @@
-import express from 'express';
-import { engine } from 'express-handlebars';
-import productsRouter from './routes/products.routes.js';
-import cartsRouter from './routes/carts.routes.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import path from "path";
+import exphbs from "express-handlebars";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import productsRoutes from "./routes/products.routes.js";
+import cartsRoutes from "./routes/carts.routes.js";
 
 const app = express();
 const PORT = 8080;
 
-// Middleware para parsear JSON y formularios
+// Servidor HTTP + Socket.IO
+const server = createServer(app);
+const io = new Server(server);
+
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(process.cwd(), "public")));
 
-// Servir archivos estáticos (CSS, imágenes, JS)
-app.use(express.static(path.join(__dirname, 'public')));
+// Handlebars
+app.engine("handlebars", exphbs.engine());
+app.set("view engine", "handlebars");
+app.set("views", path.join(process.cwd(), "src/views"));
 
-// Configuración Handlebars
-app.engine(
-  'handlebars',
-  engine({
-    layoutsDir: path.join(__dirname, 'views', 'layouts'),   // Carpeta de layouts
-    defaultLayout: 'main',                                   // Layout por defecto
-    partialsDir: path.join(__dirname, 'views', 'partials'),  // Carpeta de partials
-  })
+// ------------------ RUTAS ------------------
+
+// Home
+app.get("/", (req, res) => {
+  res.render("home");
+});
+
+// Ecommerce vistas y API
+app.use("/products", productsRoutes);       // Handlebars /products/view
+app.use("/api/products", productsRoutes);   // API JSON
+app.use("/api/carts", cartsRoutes);
+
+// Chat
+app.get("/chat", (req, res) => {
+  res.render("chat");
+});
+
+// ------------------ SOCKET.IO ------------------
+io.on("connection", (socket) => {
+  console.log("🟢 Nuevo cliente conectado");
+
+  socket.on("message", (data) => {
+    io.emit("messageLogs", data);
+  });
+});
+
+// ------------------ LEVANTAR SERVER ------------------
+server.listen(PORT, () =>
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
 );
-app.set('view engine', 'handlebars');
-app.set('views', path.join(__dirname, 'views'));
-
-// Routers
-app.use('/api/products', productsRouter);
-app.use('/api/carts', cartsRouter);
-
-// Ruta principal con renderizado
-app.get('/', (req, res) => {
-  res.render('home', { title: '¡Servidor funcionando!' });
-});
-
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
