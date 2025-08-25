@@ -1,9 +1,8 @@
-<h2>Lista de Productos</h2>
-
-<ul>
-  {{#each products}}
-    <li>
-      <strong>{{title}}</strong> - {{description}} - ${{price}}
-    </li>
-  {{/each}}
-</ul>
+{{!-- Solo la lista de productos --}}
+<section id="product-list">
+  <ul>
+    {{#each products}}
+      <li>{{name}} - ${{price}}</li>
+    {{/each}}
+  </ul>
+</section>

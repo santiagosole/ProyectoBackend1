@@ -1,0 +1,18 @@
+<section class="mb-4">
+  <h2>Productos en tiempo real</h2>
+
+  <form id="formAddProduct" class="mb-3">
+    <input type="text" placeholder="Nombre" id="name" required>
+    <input type="number" placeholder="Precio" id="price" required>
+    <button type="submit" class="btn btn-primary btn-sm">Agregar Producto</button>
+  </form>
+
+  <ul id="productList" class="list-group">
+    {{#each products}}
+      <li class="list-group-item">{{name}} - ${{price}}</li>
+    {{/each}}
+  </ul>
+</section>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/realtimeproducts.js"></script>

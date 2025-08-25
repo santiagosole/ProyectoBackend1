@@ -1,56 +1,70 @@
 import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
+import { engine } from "express-handlebars";
 import path from "path";
-import exphbs from "express-handlebars";
+import { fileURLToPath } from "url";
+import { Server } from "socket.io";
+import http from "http";
 
-import productsRoutes from "./routes/products.routes.js";
-import cartsRoutes from "./routes/carts.routes.js";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 8080;
 
-// Servidor HTTP + Socket.IO
-const server = createServer(app);
-const io = new Server(server);
+// Datos iniciales
+let products = [
+  { id: 1, name: "Notebook Gamer", price: 1200 },
+  { id: 2, name: "Teclado Mecánico RGB", price: 150 },
+  { id: 3, name: "Mouse Inalámbrico", price: 75 },
+  { id: 4, name: "Auriculares Gaming", price: 100 },
+  { id: 5, name: "Monitor 27\" 144Hz", price: 350 },
+];
 
-// Middlewares
+// Configuración Handlebars
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
+app.set("views", path.join(__dirname, "views"));
+
+// Archivos estáticos
+app.use(express.static(path.join(__dirname, "../public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(process.cwd(), "public")));
 
-// Handlebars
-app.engine("handlebars", exphbs.engine());
-app.set("view engine", "handlebars");
-app.set("views", path.join(process.cwd(), "src/views"));
+// Servidor HTTP y Socket.io
+const server = http.createServer(app);
+const io = new Server(server);
 
-// ------------------ RUTAS ------------------
-
-// Home
+// Rutas
 app.get("/", (req, res) => {
-  res.render("home");
+  res.render("home", { title: "Lista de productos en tiempo real", products });
 });
 
-// Ecommerce vistas y API
-app.use("/products", productsRoutes);       // Handlebars /products/view
-app.use("/api/products", productsRoutes);   // API JSON
-app.use("/api/carts", cartsRoutes);
-
-// Chat
-app.get("/chat", (req, res) => {
-  res.render("chat");
+app.get("/productos", (req, res) => {
+  res.render("products/products", { title: "Lista de Productos", products });
 });
 
-// ------------------ SOCKET.IO ------------------
+app.get("/realtimeproducts", (req, res) => {
+  res.render("realtimeproducts", { title: "Productos en tiempo real", products });
+});
+
+// Socket.io
 io.on("connection", (socket) => {
-  console.log("🟢 Nuevo cliente conectado");
+  console.log("Cliente conectado");
 
-  socket.on("message", (data) => {
-    io.emit("messageLogs", data);
+  // Enviar lista inicial
+  socket.emit("updateProducts", products);
+
+  // Escuchar nuevo producto
+  socket.on("newProduct", (product) => {
+    const newId = products.length ? products[products.length - 1].id + 1 : 1;
+    const newProduct = { id: newId, ...product };
+    products.push(newProduct);
+
+    io.emit("updateProducts", products);
   });
 });
 
-// ------------------ LEVANTAR SERVER ------------------
-server.listen(PORT, () =>
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
-);
+// Levantar servidor
+server.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});

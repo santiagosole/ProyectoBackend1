@@ -1,3 +1,12 @@
-{{> header}}
-<h1>Bienvenido a la tienda</h1>
-<p>Usá el menú para navegar entre productos y carritos.</p>
+{{!-- Solo contenido específico del home --}}
+<section id="home">
+  <p>Bienvenido al E-commerce. Explora nuestros productos:</p>
+
+  <section id="product-list">
+    <ul>
+      {{#each products}}
+        <li>{{name}} - ${{price}}</li>
+      {{/each}}
+    </ul>
+  </section>
+</section>
