@@ -1,7 +1,6 @@
 import ProductManager from "../managers/ProductManager.js";
 const productManager = new ProductManager();
 
-// Vista de productos para Handlebars
 export const getProductsView = async (req, res) => {
   try {
     const products = await productManager.getProducts();

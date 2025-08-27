@@ -1,29 +1,49 @@
 const socket = io();
 
-// Formulario para agregar productos
-const form = document.getElementById("formAddProduct");
+// Selección de elementos
+const productForm = document.getElementById("productForm");
 const productList = document.getElementById("productList");
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const name = document.getElementById("name").value;
-  const price = parseFloat(document.getElementById("price").value);
-
-  if (!name || !price) return;
-
-  socket.emit("newProduct", { name, price });
-
-  form.reset();
-});
-
-// Recibir lista actualizada de productos
-socket.on("updateProducts", (products) => {
+// Función para renderizar productos
+function renderProducts(products) {
   productList.innerHTML = "";
   products.forEach((p) => {
-    const li = document.createElement("li");
-    li.textContent = `${p.name} - $${p.price}`;
-    li.className = "list-group-item";
-    productList.appendChild(li);
+    const col = document.createElement("div");
+    col.className = "col-md-4 mb-4";
+    col.innerHTML = `
+      <div class="card shadow-sm h-100">
+        <img src="${p.thumbnail ? p.thumbnail : 'https://via.placeholder.com/300x200.png?text=Sin+Imagen'}" 
+             class="card-img-top" alt="${p.title}">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">${p.title}</h5>
+          <p class="fw-bold text-primary mb-1">Precio: $${p.price}</p>
+          <div class="mt-auto">
+            <button class="btn btn-sm btn-danger delete-btn" data-id="${p.id}">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    `;
+    col.querySelector(".delete-btn").addEventListener("click", () => {
+      socket.emit("deleteProduct", p.id);
+    });
+    productList.appendChild(col);
   });
+}
+
+// Recibir productos y actualizaciones
+socket.on("updateProducts", (products) => {
+  renderProducts(products);
+});
+
+// Agregar producto desde formulario
+productForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const formData = new FormData(productForm);
+  const product = {
+    title: formData.get("title"),
+    price: parseFloat(formData.get("price")),
+    thumbnail: ""
+  };
+  socket.emit("addProduct", product);
+  productForm.reset();
 });
