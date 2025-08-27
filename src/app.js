@@ -34,24 +34,11 @@ app.get("/", (req, res) => {
   res.render("home", { products });
 });
 
-// Productos
+// Productos - versión tiempo real
 app.get("/products", (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 3; 
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-
-  const paginatedProducts = products.slice(startIndex, endIndex);
-
-  res.render("products/products", {
-    products: paginatedProducts,
-    currentPage: page,
-    hasNextPage: endIndex < products.length,
-    hasPrevPage: startIndex > 0,
-    nextPage: page + 1,
-    prevPage: page - 1
-  });
+  res.render("products/products", { products });
 });
+
 
 // Real Time Products
 app.get("/realTimeProducts", (req, res) => {
