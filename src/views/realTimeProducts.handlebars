@@ -1,18 +1,53 @@
-<section class="mb-4">
-  <h2>Productos en tiempo real</h2>
+<h1 class="mb-4">Productos en tiempo real</h1>
 
-  <form id="formAddProduct" class="mb-3">
-    <input type="text" placeholder="Nombre" id="name" required>
-    <input type="number" placeholder="Precio" id="price" required>
-    <button type="submit" class="btn btn-primary btn-sm">Agregar Producto</button>
-  </form>
+<form id="productForm" class="mb-4">
+  <div class="row g-2">
+    <div class="col-md-5">
+      <input type="text" class="form-control" placeholder="Título" name="title" required>
+    </div>
+    <div class="col-md-5">
+      <input type="number" class="form-control" placeholder="Precio" name="price" required>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button type="submit" class="btn btn-success">Agregar</button>
+    </div>
+  </div>
+</form>
 
-  <ul id="productList" class="list-group">
-    {{#each products}}
-      <li class="list-group-item">{{name}} - ${{price}}</li>
-    {{/each}}
-  </ul>
-</section>
+<ul id="productList" class="list-group"></ul>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="/js/realtimeproducts.js"></script>
+<script>
+  const socket = io();
+
+  const productForm = document.getElementById("productForm");
+  const productList = document.getElementById("productList");
+
+  // Recibir productos
+  socket.on("updateProducts", (products) => {
+    productList.innerHTML = "";
+    products.forEach((p) => {
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+      li.innerHTML = `
+        ${p.title} - $${p.price}
+        <button class="btn btn-sm btn-danger">Eliminar</button>
+      `;
+      li.querySelector("button").addEventListener("click", () => {
+        socket.emit("deleteProduct", p.id);
+      });
+      productList.appendChild(li);
+    });
+  });
+
+  // Agregar producto
+  productForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const formData = new FormData(productForm);
+    const product = {
+      title: formData.get("title"),
+      price: parseFloat(formData.get("price"))
+    };
+    socket.emit("addProduct", product);
+    productForm.reset();
+  });
+</script>

@@ -1,9 +1,8 @@
 import express from "express";
 import { engine } from "express-handlebars";
+import { Server } from "socket.io";
 import path from "path";
 import { fileURLToPath } from "url";
-import { Server } from "socket.io";
-import http from "http";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,60 +10,68 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 8080;
 
-// Datos iniciales
-let products = [
-  { id: 1, name: "Notebook Gamer", price: 1200 },
-  { id: 2, name: "Teclado Mecánico RGB", price: 150 },
-  { id: 3, name: "Mouse Inalámbrico", price: 75 },
-  { id: 4, name: "Auriculares Gaming", price: 100 },
-  { id: 5, name: "Monitor 27\" 144Hz", price: 350 },
-];
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 
-// Configuración Handlebars
+// Handlebars
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
-// Archivos estáticos
-app.use(express.static(path.join(__dirname, "../public")));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Servidor HTTP y Socket.io
-const server = http.createServer(app);
-const io = new Server(server);
+// Simulación de productos
+let products = [
+  { id: 1, title: "Producto A", price: 125 },
+  { id: 2, title: "Producto B", price: 135 },
+  { id: 3, title: "Producto C", price: 145 }
+];
 
 // Rutas
 app.get("/", (req, res) => {
-  res.render("home", { title: "Lista de productos en tiempo real", products });
+  res.render("home", { products });
 });
 
-app.get("/productos", (req, res) => {
-  res.render("products/products", { title: "Lista de Productos", products });
+app.get("/products", (req, res) => {
+  res.render("products/products", { products });
 });
+
 
 app.get("/realtimeproducts", (req, res) => {
-  res.render("realtimeproducts", { title: "Productos en tiempo real", products });
+  res.render("realtimeproducts", { products });
 });
 
-// Socket.io
-io.on("connection", (socket) => {
-  console.log("Cliente conectado");
+// Server
+const server = app.listen(PORT, () =>
+  console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`)
+);
 
-  // Enviar lista inicial
+// WebSockets
+const io = new Server(server);
+
+io.on("connection", (socket) => {
+  console.log("🟢 Cliente conectado");
+
+  // Enviar productos iniciales
   socket.emit("updateProducts", products);
 
-  // Escuchar nuevo producto
-  socket.on("newProduct", (product) => {
-    const newId = products.length ? products[products.length - 1].id + 1 : 1;
-    const newProduct = { id: newId, ...product };
+  // Agregar producto
+  socket.on("addProduct", (product) => {
+    const newProduct = {
+      id: products.length + 1,
+      ...product
+    };
     products.push(newProduct);
-
     io.emit("updateProducts", products);
   });
-});
 
-// Levantar servidor
-server.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  // Eliminar producto
+  socket.on("deleteProduct", (id) => {
+    products = products.filter((p) => p.id !== id);
+    io.emit("updateProducts", products);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔴 Cliente desconectado");
+  });
 });

@@ -1,12 +1,13 @@
-{{!-- Solo contenido específico del home --}}
-<section id="home">
-  <p>Bienvenido al E-commerce. Explora nuestros productos:</p>
-
-  <section id="product-list">
-    <ul>
-      {{#each products}}
-        <li>{{name}} - ${{price}}</li>
-      {{/each}}
-    </ul>
-  </section>
-</section>
+<h1 class="mb-4">Bienvenido a la tienda</h1>
+<div class="row">
+  {{#each products}}
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{this.title}}</h5>
+        <p class="card-text">Precio: ${{this.price}}</p>
+      </div>
+    </div>
+  </div>
+  {{/each}}
+</div>
