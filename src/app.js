@@ -3,12 +3,18 @@ import { engine } from "express-handlebars";
 import { Server } from "socket.io";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+import { connectDB } from './config/db.js';
+import productsRouter from './routes/products.routes.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+dotenv.config();
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(express.json());
@@ -20,29 +26,42 @@ app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
-// Simulación de productos
-let products = [
-  { id: 1, title: "Notebook Gamer", price: 1200, description: "Potente notebook para gaming", thumbnail: "", stock: 5, category: "Electrónica" },
-  { id: 2, title: "Teclado Mecánico RGB", price: 150, description: "Teclado mecánico con luces RGB", thumbnail: "", stock: 10, category: "Periféricos" },
-  { id: 3, title: "Mouse Inalámbrico", price: 75, description: "Mouse inalámbrico ergonómico", thumbnail: "", stock: 15, category: "Periféricos" },
-  { id: 4, title: "Auriculares Gaming", price: 100, description: "Auriculares con micrófono y sonido envolvente", thumbnail: "", stock: 7, category: "Audio" },
-  { id: 5, title: 'Monitor 27" 144Hz', price: 350, description: "Monitor con alta tasa de refresco", thumbnail: "", stock: 4, category: "Monitores" }
-];
+// Conexión a MongoDB
+connectDB();
 
-// Rutas
-app.get("/", (req, res) => {
-  res.render("home", { products });
+// Rutas API
+app.use("/api/products", productsRouter);
+
+// Vista home
+app.get("/", async (req, res) => {
+  try {
+    const products = await productsRouter.stack[0].handle(); // alternativa: traer productos desde Product model
+    res.render("home", { products });
+  } catch (err) {
+    res.status(500).send("Error al cargar productos");
+  }
 });
 
-// Productos - versión tiempo real
-app.get("/products", (req, res) => {
-  res.render("products/products", { products });
+// Vista productos
+app.get("/products", async (req, res) => {
+  try {
+    const Product = (await import("./models/Product.js")).default;
+    const products = await Product.find();
+    res.render("products/products", { products });
+  } catch (err) {
+    res.status(500).send("Error al cargar productos");
+  }
 });
-
 
 // Real Time Products
-app.get("/realTimeProducts", (req, res) => {
-  res.render("realTimeProducts", { products });
+app.get("/realTimeProducts", async (req, res) => {
+  try {
+    const Product = (await import("./models/Product.js")).default;
+    const products = await Product.find();
+    res.render("realTimeProducts", { products });
+  } catch (err) {
+    res.status(500).send("Error al cargar productos");
+  }
 });
 
 // Server
@@ -51,28 +70,37 @@ const server = app.listen(PORT, () =>
 );
 
 // WebSockets
+import Product from "./models/Product.js";
 const io = new Server(server);
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log("🟢 Cliente conectado");
 
-  // Enviar productos iniciales
+  // Enviar productos iniciales desde DB
+  const products = await Product.find();
   socket.emit("updateProducts", products);
 
   // Agregar producto
-  socket.on("addProduct", (product) => {
-    const newProduct = {
-      id: products.length + 1,
-      ...product
-    };
-    products.push(newProduct);
-    io.emit("updateProducts", products);
+  socket.on("addProduct", async (productData) => {
+    try {
+      const newProduct = new Product(productData);
+      await newProduct.save();
+      const products = await Product.find();
+      io.emit("updateProducts", products);
+    } catch (err) {
+      socket.emit("error", err.message);
+    }
   });
 
   // Eliminar producto
-  socket.on("deleteProduct", (id) => {
-    products = products.filter((p) => p.id !== id);
-    io.emit("updateProducts", products);
+  socket.on("deleteProduct", async (id) => {
+    try {
+      await Product.findByIdAndDelete(id);
+      const products = await Product.find();
+      io.emit("updateProducts", products);
+    } catch (err) {
+      socket.emit("error", err.message);
+    }
   });
 
   socket.on("disconnect", () => {
