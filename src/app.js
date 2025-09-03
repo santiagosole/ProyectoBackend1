@@ -7,12 +7,14 @@ import dotenv from "dotenv";
 
 import { connectDB } from './config/db.js';
 import productsRouter from './routes/products.routes.js';
+import { getHomeView } from "./controllers/products.controller.js";
+import Product from "./models/Product.js";
 
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -32,20 +34,12 @@ connectDB();
 // Rutas API
 app.use("/api/products", productsRouter);
 
-// Vista home
-app.get("/", async (req, res) => {
-  try {
-    const products = await productsRouter.stack[0].handle(); // alternativa: traer productos desde Product model
-    res.render("home", { products });
-  } catch (err) {
-    res.status(500).send("Error al cargar productos");
-  }
-});
+// Vista Home
+app.get("/", getHomeView);
 
-// Vista productos
+// Vista Productos
 app.get("/products", async (req, res) => {
   try {
-    const Product = (await import("./models/Product.js")).default;
     const products = await Product.find();
     res.render("products/products", { products });
   } catch (err) {
@@ -56,7 +50,6 @@ app.get("/products", async (req, res) => {
 // Real Time Products
 app.get("/realTimeProducts", async (req, res) => {
   try {
-    const Product = (await import("./models/Product.js")).default;
     const products = await Product.find();
     res.render("realTimeProducts", { products });
   } catch (err) {
@@ -64,13 +57,12 @@ app.get("/realTimeProducts", async (req, res) => {
   }
 });
 
-// Server
+// Servidor
 const server = app.listen(PORT, () =>
   console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`)
 );
 
 // WebSockets
-import Product from "./models/Product.js";
 const io = new Server(server);
 
 io.on("connection", async (socket) => {

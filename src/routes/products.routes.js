@@ -60,7 +60,11 @@ router.post("/", async (req, res) => {
 // Actualizar producto
 router.put("/:pid", async (req, res) => {
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.pid, req.body, { new: true, runValidators: true });
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.pid,
+      req.body,
+      { new: true, runValidators: true }
+    );
     if (!updatedProduct) return res.status(404).json({ error: "Producto no encontrado" });
     res.json(updatedProduct);
   } catch (error) {
