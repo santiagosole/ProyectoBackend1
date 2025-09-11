@@ -21,13 +21,42 @@
   </nav>
 
   <div class="container my-5">
+
     <h1 class="text-center mb-4">Lista de Productos</h1>
-    <div class="row">
+
+    <form class="row mb-4" method="get" action="/">
+      <div class="col-md-3 mb-2">
+        <select name="query" class="form-select">
+          <option value="">Todas las categorías</option>
+          <option value="available" {{#ifEquals query "available"}}selected{{/ifEquals}}>Disponibles</option>
+          <option value="Electrónica" {{#ifEquals query "Electrónica"}}selected{{/ifEquals}}>Electrónica</option>
+          <option value="Ropa" {{#ifEquals query "Ropa"}}selected{{/ifEquals}}>Ropa</option>
+        </select>
+      </div>
+      <div class="col-md-3 mb-2">
+        <select name="sort" class="form-select">
+          <option value="">Ordenar por precio</option>
+          <option value="asc" {{#ifEquals sort "asc"}}selected{{/ifEquals}}>Ascendente</option>
+          <option value="desc" {{#ifEquals sort "desc"}}selected{{/ifEquals}}>Descendente</option>
+        </select>
+      </div>
+      <div class="col-md-2 mb-2">
+        <input type="number" name="limit" min="1" class="form-control" placeholder="Limit" value="{{limit}}">
+      </div>
+      <div class="col-md-2 mb-2">
+        <input type="number" name="page" min="1" class="form-control" placeholder="Page" value="{{pagination.page}}">
+      </div>
+      <div class="col-md-2 mb-2">
+        <button class="btn btn-primary w-100" type="submit">Aplicar</button>
+      </div>
+    </form>
+
+    <div class="row" id="productList">
       {{#each products}}
         <div class="col-md-4 mb-4">
           <div class="card shadow-sm h-100">
-            {{#if this.thumbnail}}
-              <img src="{{this.thumbnail}}" class="card-img-top" alt="{{this.title}}">
+            {{#if this.thumbnails.[0]}}
+              <img src="{{this.thumbnails.[0]}}" class="card-img-top" alt="{{this.title}}">
             {{else}}
               <img src="https://via.placeholder.com/300x200.png?text=Sin+Imagen" class="card-img-top" alt="Imagen no disponible">
             {{/if}}
@@ -45,6 +74,36 @@
         </div>
       {{/each}}
     </div>
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        {{#if pagination.hasPrevPage}}
+          <li class="page-item">
+            <a class="page-link" href="{{pagination.prevLink}}">Anterior</a>
+          </li>
+        {{else}}
+          <li class="page-item disabled">
+            <span class="page-link">Anterior</span>
+          </li>
+        {{/if}}
+
+        <li class="page-item active">
+          <span class="page-link">{{pagination.page}}</span>
+        </li>
+
+        {{#if pagination.hasNextPage}}
+          <li class="page-item">
+            <a class="page-link" href="{{pagination.nextLink}}">Siguiente</a>
+          </li>
+        {{else}}
+          <li class="page-item disabled">
+            <span class="page-link">Siguiente</span>
+          </li>
+        {{/if}}
+      </ul>
+    </nav>
+
   </div>
 
   <footer class="bg-dark text-white text-center py-3 mt-auto">

@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 
 import { connectDB } from './config/db.js';
 import productsRouter from './routes/products.routes.js';
-import { getHomeView } from "./controllers/products.controller.js";
+import { getProductsView } from "./controllers/products.controller.js";
 import Product from "./models/Product.js";
 
 dotenv.config();
@@ -23,8 +23,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public"))); 
 
-// Handlebars
-app.engine("handlebars", engine());
+// Handlebars con helpers
+app.engine(
+  "handlebars",
+  engine({
+    helpers: {
+      ifEquals: (a, b, options) => {
+        return a === b ? options.fn(this) : options.inverse(this);
+      }
+    }
+  })
+);
+
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
@@ -35,7 +45,7 @@ connectDB();
 app.use("/api/products", productsRouter);
 
 // Vista Home
-app.get("/", getHomeView);
++ app.get("/", getProductsView);
 
 // Vista Productos
 app.get("/products", async (req, res) => {
