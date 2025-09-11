@@ -40,7 +40,7 @@ app.get("/", getHomeView);
 // Vista Productos
 app.get("/products", async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().lean(); 
     res.render("products/products", { products });
   } catch (err) {
     res.status(500).send("Error al cargar productos");
@@ -50,7 +50,7 @@ app.get("/products", async (req, res) => {
 // Real Time Products
 app.get("/realTimeProducts", async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().lean();
     res.render("realTimeProducts", { products });
   } catch (err) {
     res.status(500).send("Error al cargar productos");
@@ -69,7 +69,7 @@ io.on("connection", async (socket) => {
   console.log("🟢 Cliente conectado");
 
   // Enviar productos iniciales desde DB
-  const products = await Product.find();
+  const products = await Product.find().lean(); 
   socket.emit("updateProducts", products);
 
   // Agregar producto
@@ -77,7 +77,7 @@ io.on("connection", async (socket) => {
     try {
       const newProduct = new Product(productData);
       await newProduct.save();
-      const products = await Product.find();
+      const products = await Product.find().lean();
       io.emit("updateProducts", products);
     } catch (err) {
       socket.emit("error", err.message);
@@ -88,7 +88,7 @@ io.on("connection", async (socket) => {
   socket.on("deleteProduct", async (id) => {
     try {
       await Product.findByIdAndDelete(id);
-      const products = await Product.find();
+      const products = await Product.find().lean();
       io.emit("updateProducts", products);
     } catch (err) {
       socket.emit("error", err.message);

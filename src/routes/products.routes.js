@@ -1,6 +1,6 @@
 import { Router } from "express";
 import Product from "../models/Product.js";
-import { getProductsView } from "../controllers/products.controller.js";
+import { getProductsView, getProductsAPI } from "../controllers/products.controller.js";
 
 const router = Router();
 
@@ -9,15 +9,8 @@ router.get("/view", getProductsView);
 
 // RUTAS API
 
-// Obtener todos los productos
-router.get("/", async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener productos" });
-  }
-});
+// Obtener todos los productos con paginación, filtros y sort
+router.get("/", getProductsAPI);
 
 // Obtener producto por ID
 router.get("/:pid", async (req, res) => {
