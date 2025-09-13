@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import Cart from "../models/Cart.js";
 
 // Controlador para la vista Home con filtros, orden y paginación
 export const getProductsView = async (req, res) => {
@@ -13,13 +14,21 @@ export const getProductsView = async (req, res) => {
       else query.category = req.query.query;
     }
 
-    const options = { page, limit, lean: true };
+    const options = { page, limit, lean: true };  
     if (sort) options.sort = { price: sort };
 
     const result = await Product.paginate(query, options);
 
+    // Tomar el primer carrito existente para el ejemplo (podés usar sesión de usuario en producción)
+    let cart = await Cart.findOne().lean();
+    if (!cart) {
+      const newCart = await Cart.create({ products: [] });
+      cart = newCart.toObject();
+    }
+
     res.render("home", {
       products: result.docs,
+      cartId: cart._id,
       pagination: {
         totalPages: result.totalPages,
         prevPage: result.hasPrevPage ? result.prevPage : null,
@@ -76,7 +85,7 @@ export const getProductsAPI = async (req, res) => {
 // Crear varios productos al mismo tiempo (bulk)
 export const createMultipleProducts = async (req, res) => {
   try {
-    const { products } = req.body; // array de productos
+    const { products } = req.body;
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "Debe enviar un array de productos" });
     }
