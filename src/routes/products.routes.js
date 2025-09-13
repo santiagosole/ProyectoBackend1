@@ -1,8 +1,13 @@
 import { Router } from "express";
 import Product from "../models/Product.js";
 import { getProductsView, getProductsAPI } from "../controllers/products.controller.js";
+import { createMultipleProducts } from "../controllers/products.controller.js";
+
 
 const router = Router();
+
+// Ruta para crear varios productos a la vez
+router.post("/bulk", createMultipleProducts);
 
 // RUTA VISTA
 router.get("/view", getProductsView);

@@ -9,6 +9,8 @@ import { connectDB } from './config/db.js';
 import productsRouter from './routes/products.routes.js';
 import { getProductsView } from "./controllers/products.controller.js";
 import Product from "./models/Product.js";
+import cartsRouter from "./routes/carts.routes.js";
+import Cart from "./models/Cart.js"; 
 
 dotenv.config();
 
@@ -28,9 +30,8 @@ app.engine(
   "handlebars",
   engine({
     helpers: {
-      ifEquals: (a, b, options) => {
-        return a === b ? options.fn(this) : options.inverse(this);
-      }
+      ifEquals: (a, b, options) => a === b ? options.fn(this) : options.inverse(this),
+      multiply: (a, b) => a * b // <-- helper para calcular subtotal
     }
   })
 );
@@ -43,9 +44,10 @@ connectDB();
 
 // Rutas API
 app.use("/api/products", productsRouter);
+app.use("/api/carts", cartsRouter);
 
 // Vista Home
-+ app.get("/", getProductsView);
+app.get("/", getProductsView);
 
 // Vista Productos
 app.get("/products", async (req, res) => {
@@ -66,6 +68,35 @@ app.get("/realTimeProducts", async (req, res) => {
     res.status(500).send("Error al cargar productos");
   }
 });
+
+app.get("/carts/:cid", async (req, res) => {
+  try {
+    const cart = await Cart.findById(req.params.cid)
+      .populate("products.product")
+      .lean();
+
+    if (!cart) return res.status(404).send("Carrito no encontrado");
+
+    // Filtrar productos nulos (por si algún populate falló)
+    const validProducts = cart.products.filter(item => item.product);
+
+    const total = validProducts.reduce(
+      (acc, item) => acc + item.product.price * item.quantity,
+      0
+    );
+
+    res.render("carts/cart", {
+      products: validProducts,
+      total
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error al cargar carrito");
+  }
+});
+;
+
+
 
 // Servidor
 const server = app.listen(PORT, () =>

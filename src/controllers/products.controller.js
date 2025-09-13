@@ -72,3 +72,19 @@ export const getProductsAPI = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
+
+// Crear varios productos al mismo tiempo (bulk)
+export const createMultipleProducts = async (req, res) => {
+  try {
+    const { products } = req.body; // array de productos
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ error: "Debe enviar un array de productos" });
+    }
+
+    const createdProducts = await Product.insertMany(products);
+    res.status(201).json(createdProducts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};

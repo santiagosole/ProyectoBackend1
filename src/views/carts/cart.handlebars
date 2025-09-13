@@ -1,0 +1,84 @@
+<table>
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Precio</th>
+      <th>Cantidad</th>
+      <th>Subtotal</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each products}}
+    <tr data-product-id="{{product._id}}">
+      <td>{{product.title}}</td>
+      <td>${{product.price}}</td>
+      <td>
+        <button class="decrease">-</button>
+        {{quantity}}
+        <button class="increase">+</button>
+      </td>
+      <td>${{multiply product.price quantity}}</td>
+      <td>
+        <button class="remove">Eliminar</button>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<h3>Total: ${{total}}</h3>
+
+<script>
+  // Seleccionamos la tabla
+  const table = document.querySelector("table tbody");
+  const cartId = window.location.pathname.split("/")[2]; // toma el :cid de la URL
+
+  // Función para actualizar cantidad
+  const updateQuantity = async (pid, quantity) => {
+    try {
+      const res = await fetch(`/api/carts/${cartId}/products/${pid}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity })
+      });
+      if (!res.ok) throw new Error("Error al actualizar cantidad");
+      location.reload(); // recarga la página para reflejar cambios
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Función para eliminar producto
+  const removeProduct = async (pid) => {
+    try {
+      const res = await fetch(`/api/carts/${cartId}/products/${pid}`, {
+        method: "DELETE"
+      });
+      if (!res.ok) throw new Error("Error al eliminar producto");
+      location.reload();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  table.addEventListener("click", (e) => {
+    const row = e.target.closest("tr");
+    if (!row) return;
+    const pid = row.dataset.productId;
+
+    if (e.target.classList.contains("increase")) {
+      const qty = parseInt(row.querySelector("td:nth-child(3)").textContent) + 1;
+      updateQuantity(pid, qty);
+    }
+
+    if (e.target.classList.contains("decrease")) {
+      const qty = parseInt(row.querySelector("td:nth-child(3)").textContent) - 1;
+      if (qty > 0) updateQuantity(pid, qty);
+    }
+
+    if (e.target.classList.contains("remove")) {
+      removeProduct(pid);
+    }
+  });
+</script>
