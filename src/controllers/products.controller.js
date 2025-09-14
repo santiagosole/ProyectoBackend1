@@ -1,7 +1,6 @@
 import Product from "../models/Product.js";
 import Cart from "../models/Cart.js";
 
-// GET /products/view → Vista Handlebars
 export const getProductsView = async (req, res) => {
   try {
     let { limit = 10, page = 1, sort, query } = req.query;
@@ -50,7 +49,6 @@ export const getProductsView = async (req, res) => {
   }
 };
 
-// GET /products → API JSON
 export const getProductsAPI = async (req, res) => {
   try {
     const products = await Product.find().lean();
@@ -60,10 +58,9 @@ export const getProductsAPI = async (req, res) => {
   }
 };
 
-// POST /products/bulk → Crear varios productos
 export const createMultipleProducts = async (req, res) => {
   try {
-    const products = req.body; // Array de productos
+    const products = req.body; 
     const result = await Product.insertMany(products);
     res.status(201).json(result);
   } catch (err) {

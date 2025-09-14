@@ -1,7 +1,6 @@
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
 
-// GET /carts/:cid → Vista Handlebars
 export const getCartView = async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.cid)
@@ -10,7 +9,7 @@ export const getCartView = async (req, res) => {
 
     if (!cart) return res.status(404).send("Carrito no encontrado");
 
-    // Filtrar productos válidos (puede que alguno se haya eliminado)
+    // Filtrar productos válidos
     const validProducts = cart.products.filter(item => item.product);
 
     // Calcular total
@@ -30,7 +29,6 @@ export const getCartView = async (req, res) => {
   }
 };
 
-// POST /carts/:cid/products → agregar un producto al carrito
 export const addProductToCart = async (req, res) => {
   try {
     const { cid } = req.params;
@@ -53,11 +51,10 @@ export const addProductToCart = async (req, res) => {
   }
 };
 
-// POST /carts/:cid/products/bulk → agregar varios productos al carrito
 export const addMultipleProductsToCart = async (req, res) => {
   try {
     const { cid } = req.params;
-    const { products } = req.body; // array [{ product: "id", quantity: 2 }, ...]
+    const { products } = req.body; 
 
     const cart = await Cart.findById(cid);
     if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
@@ -78,7 +75,6 @@ export const addMultipleProductsToCart = async (req, res) => {
   }
 };
 
-// DELETE /carts/:cid/products/:pid → eliminar producto del carrito
 export const removeProductFromCart = async (req, res) => {
   try {
     const { cid, pid } = req.params;
