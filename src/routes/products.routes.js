@@ -1,8 +1,6 @@
 import { Router } from "express";
 import Product from "../models/Product.js";
-import { getProductsView, getProductsAPI } from "../controllers/products.controller.js";
-import { createMultipleProducts } from "../controllers/products.controller.js";
-
+import { getProductsView, getProductsAPI, createMultipleProducts } from "../controllers/products.controller.js";
 
 const router = Router();
 
@@ -13,8 +11,6 @@ router.post("/bulk", createMultipleProducts);
 router.get("/view", getProductsView);
 
 // RUTAS API
-
-// Obtener todos los productos con paginación, filtros y sort
 router.get("/", getProductsAPI);
 
 // Obtener producto por ID

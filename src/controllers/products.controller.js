@@ -1,99 +1,72 @@
 import Product from "../models/Product.js";
 import Cart from "../models/Cart.js";
 
-// Controlador para la vista Home con filtros, orden y paginación
+// GET /products/view → Vista Handlebars
 export const getProductsView = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 1;
-    const sort = req.query.sort === "asc" ? 1 : req.query.sort === "desc" ? -1 : null;
+    let { limit = 10, page = 1, sort, query } = req.query;
+    limit = parseInt(limit);
+    page = parseInt(page);
 
-    let query = {};
-    if (req.query.query) {
-      if (req.query.query === "available") query.stock = { $gt: 0 };
-      else query.category = req.query.query;
+    const filter = {};
+    if (query) {
+      filter.$or = [
+        { category: { $regex: query, $options: "i" } },
+        { status: query.toLowerCase() === "true" }
+      ];
     }
 
-    const options = { page, limit, lean: true };  
-    if (sort) options.sort = { price: sort };
+    const sortOption = {};
+    if (sort === "asc") sortOption.price = 1;
+    else if (sort === "desc") sortOption.price = -1;
 
-    const result = await Product.paginate(query, options);
+    const totalProducts = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalProducts / limit);
 
-    // Tomar el primer carrito existente para el ejemplo (podés usar sesión de usuario en producción)
-    let cart = await Cart.findOne().lean();
-    if (!cart) {
-      const newCart = await Cart.create({ products: [] });
-      cart = newCart.toObject();
-    }
+    const products = await Product.find(filter)
+      .sort(sortOption)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
 
-    res.render("home", {
-      products: result.docs,
-      cartId: cart._id,
-      pagination: {
-        totalPages: result.totalPages,
-        prevPage: result.hasPrevPage ? result.prevPage : null,
-        nextPage: result.hasNextPage ? result.nextPage : null,
-        page: result.page,
-        hasPrevPage: result.hasPrevPage,
-        hasNextPage: result.hasNextPage,
-        prevLink: result.hasPrevPage ? `/?limit=${limit}&page=${result.prevPage}${req.query.sort ? `&sort=${req.query.sort}` : ""}${req.query.query ? `&query=${req.query.query}` : ""}` : null,
-        nextLink: result.hasNextPage ? `/?limit=${limit}&page=${result.nextPage}${req.query.sort ? `&sort=${req.query.sort}` : ""}${req.query.query ? `&query=${req.query.query}` : ""}` : null
-      }
-    });
+    const productsWithQty = products.map(p => ({ product: p, quantity: 1 }));
+
+    let cartId;
+    const cart = await Cart.findOne();
+    if (cart) cartId = cart._id;
+
+    const pagination = {
+      totalPages,
+      page,
+      hasPrevPage: page > 1,
+      hasNextPage: page < totalPages,
+      prevLink: page > 1 ? `?page=${page - 1}&limit=${limit}` : null,
+      nextLink: page < totalPages ? `?page=${page + 1}&limit=${limit}` : null
+    };
+
+    res.render("products/products", { products: productsWithQty, cartId, pagination });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error al cargar productos");
+    res.status(500).send("Error al cargar productos: " + err.message);
   }
 };
 
-// Controlador para la API JSON
+// GET /products → API JSON
 export const getProductsAPI = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 1;
-    const sort = req.query.sort === "asc" ? 1 : req.query.sort === "desc" ? -1 : null;
-
-    let query = {};
-    if (req.query.query) {
-      if (req.query.query === "available") query.stock = { $gt: 0 };
-      else query.category = req.query.query;
-    }
-
-    const options = { page, limit, lean: true };
-    if (sort) options.sort = { price: sort };
-
-    const result = await Product.paginate(query, options);
-
-    res.json({
-      status: "success",
-      payload: result.docs,
-      totalPages: result.totalPages,
-      prevPage: result.hasPrevPage ? result.prevPage : null,
-      nextPage: result.hasNextPage ? result.nextPage : null,
-      page: result.page,
-      hasPrevPage: result.hasPrevPage,
-      hasNextPage: result.hasNextPage,
-      prevLink: result.hasPrevPage ? `/api/products?limit=${limit}&page=${result.prevPage}${req.query.sort ? `&sort=${req.query.sort}` : ""}${req.query.query ? `&query=${req.query.query}` : ""}` : null,
-      nextLink: result.hasNextPage ? `/api/products?limit=${limit}&page=${result.nextPage}${req.query.sort ? `&sort=${req.query.sort}` : ""}${req.query.query ? `&query=${req.query.query}` : ""}` : null
-    });
+    const products = await Product.find().lean();
+    res.json(products);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ status: "error", message: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Crear varios productos al mismo tiempo (bulk)
+// POST /products/bulk → Crear varios productos
 export const createMultipleProducts = async (req, res) => {
   try {
-    const { products } = req.body;
-    if (!Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ error: "Debe enviar un array de productos" });
-    }
-
-    const createdProducts = await Product.insertMany(products);
-    res.status(201).json(createdProducts);
+    const products = req.body; // Array de productos
+    const result = await Product.insertMany(products);
+    res.status(201).json(result);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };

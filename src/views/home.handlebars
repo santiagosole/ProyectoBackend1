@@ -10,31 +10,31 @@
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="/">Mi Tienda</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto align-items-center">
-        <li class="nav-item"><a class="nav-link" href="/products">Productos</a></li>
-        <li class="nav-item"><a class="nav-link" href="/realTimeProducts">Realtime Products</a></li>
+    <div class="container">
+      <a class="navbar-brand" href="/">Mi Tienda</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link" href="/products">Productos</a></li>
+          <li class="nav-item"><a class="nav-link" href="/realTimeProducts">Realtime Products</a></li>
 
-        <!-- Dropdown carrito -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Carrito <span id="cartCount" class="badge bg-danger">0</span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px;">
-            <div id="cartItems">
-              <p class="text-center">Cargando carrito...</p>
-            </div>
-            <div class="dropdown-divider"></div>
-            <p class="text-end fw-bold">Total: $<span id="cartTotal">0</span></p>
-            <a href="/carts/{{cartId}}" class="btn btn-primary w-100">Ver Carrito</a>
-          </ul>
-        </li>
-      </ul>
+          <!-- Dropdown carrito -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Carrito <span id="cartCount" class="badge bg-danger">0</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px;">
+              <div id="cartItems">
+                <p class="text-center">Cargando carrito...</p>
+              </div>
+              <div class="dropdown-divider"></div>
+              <p class="text-end fw-bold">Total: $<span id="cartTotal">0</span></p>
+              <a href="/carts/{{cartId}}" class="btn btn-primary w-100">Ver Carrito</a>
+            </ul>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
   <!-- Contenido -->
   <div class="container my-5">
@@ -98,6 +98,7 @@
   <script>
 const cartId = "{{cartId}}";
 
+// FUNCION PARA CARGAR EL CARRITO
 async function fetchCart() {
   try {
     const res = await fetch(`/api/carts/${cartId}`);
@@ -135,7 +136,7 @@ async function fetchCart() {
     cartCount.textContent = data.products.length;
     cartTotal.textContent = total;
 
-    // Agregar event listeners para eliminar
+    // ELIMINAR PRODUCTOS DEL CARRITO
     document.querySelectorAll(".removeBtn").forEach(btn => {
       btn.addEventListener("click", async (e) => {
         const productId = e.target.closest("div").dataset.id;
@@ -149,11 +150,18 @@ async function fetchCart() {
   }
 }
 
+// AGREGAR PRODUCTO AL CARRITO
+document.querySelectorAll(".addToCart").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const productId = btn.dataset.id;
+    await fetch(`/api/carts/${cartId}/product/${productId}`, { method: "POST" });
+    fetchCart();
+  });
+});
+
 // Inicializar
 fetchCart();
-
-// Opcional: actualizar cada 5 segundos para simular tiempo real
-setInterval(fetchCart, 5000);
+setInterval(fetchCart, 5000); // actualiza cada 5s
 </script>
 
 </body>

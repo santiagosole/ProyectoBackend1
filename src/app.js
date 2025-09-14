@@ -31,10 +31,14 @@ app.engine(
   engine({
     helpers: {
       ifEquals: (a, b, options) => a === b ? options.fn(this) : options.inverse(this),
-      multiply: (a, b) => a * b // <-- helper para calcular subtotal
+      multiply: (a, b) => a * b,
+      calculateTotal: (products) => {
+        return products.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+      }
     }
   })
 );
+
 
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
@@ -50,14 +54,7 @@ app.use("/api/carts", cartsRouter);
 app.get("/", getProductsView);
 
 // Vista Productos
-app.get("/products", async (req, res) => {
-  try {
-    const products = await Product.find().lean(); 
-    res.render("products/products", { products });
-  } catch (err) {
-    res.status(500).send("Error al cargar productos");
-  }
-});
+app.get("/products", getProductsView);
 
 // Real Time Products
 app.get("/realTimeProducts", async (req, res) => {
@@ -77,7 +74,6 @@ app.get("/carts/:cid", async (req, res) => {
 
     if (!cart) return res.status(404).send("Carrito no encontrado");
 
-    // Filtrar productos nulos (por si algún populate falló)
     const validProducts = cart.products.filter(item => item.product);
 
     const total = validProducts.reduce(
@@ -94,9 +90,6 @@ app.get("/carts/:cid", async (req, res) => {
     res.status(500).send("Error al cargar carrito");
   }
 });
-;
-
-
 
 // Servidor
 const server = app.listen(PORT, () =>
@@ -109,11 +102,9 @@ const io = new Server(server);
 io.on("connection", async (socket) => {
   console.log("🟢 Cliente conectado");
 
-  // Enviar productos iniciales desde DB
   const products = await Product.find().lean(); 
   socket.emit("updateProducts", products);
 
-  // Agregar producto
   socket.on("addProduct", async (productData) => {
     try {
       const newProduct = new Product(productData);
@@ -125,7 +116,6 @@ io.on("connection", async (socket) => {
     }
   });
 
-  // Eliminar producto
   socket.on("deleteProduct", async (id) => {
     try {
       await Product.findByIdAndDelete(id);
