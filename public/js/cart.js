@@ -1,54 +1,47 @@
-const cartId = "{{cartId}}"; // Debe venir del backend en render
+const cartId = "{{cartId}}"; // Esto viene del backend al renderizar la vista
 
-async function updateCart() {
+// Función para agregar un producto al carrito
+async function addToCart(productId) {
+  // Obtener el carrito actual
   const res = await fetch(`/api/carts/${cartId}`);
   const cart = await res.json();
-  const tbody = document.getElementById("cartBody");
-  tbody.innerHTML = "";
 
-  let total = 0;
+  // Copiar productos y aumentar cantidad si ya existe
+  const products = cart.products.map(p => ({
+    productId: p.product._id,
+    quantity: p.quantity
+  }));
 
-  cart.products.forEach(item => {
-    const tr = document.createElement("tr");
-    tr.dataset.id = item.product._id;
+  const existing = products.find(p => p.productId === productId);
+  if (existing) existing.quantity += 1;
+  else products.push({ productId, quantity: 1 });
 
-    const subtotal = item.product.price * item.quantity;
-    total += subtotal;
-
-    tr.innerHTML = `
-      <td>${item.product.title}</td>
-      <td>$${item.product.price}</td>
-      <td>
-        <input type="number" class="form-control quantity-input" value="${item.quantity}" min="0">
-      </td>
-      <td class="subtotal">$${subtotal}</td>
-      <td>
-        <button class="btn btn-sm btn-primary update">Actualizar</button>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
+  // Enviar carrito actualizado al backend
+  await fetch(`/api/carts/${cartId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ products })
   });
 
-  document.getElementById("cartTotal").textContent = total;
-
-  // Eventos de actualización
-  document.querySelectorAll(".update").forEach(btn => {
-    btn.addEventListener("click", async (e) => {
-      const tr = e.target.closest("tr");
-      const pid = tr.dataset.id;
-      const quantity = parseInt(tr.querySelector(".quantity-input").value);
-
-      await fetch(`/api/carts/${cartId}/product/${pid}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantity })
-      });
-
-      updateCart();
-    });
-  });
+  // Actualizar el contador en el navbar
+  updateCartCount();
 }
 
-// Ejecuta al cargar la página
-updateCart();
+// Evento para todos los botones “Agregar al carrito”
+document.querySelectorAll(".add-to-cart").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const productId = btn.dataset.id;
+    addToCart(productId);
+  });
+});
+
+// Función para actualizar el contador del carrito
+async function updateCartCount() {
+  const res = await fetch(`/api/carts/${cartId}`);
+  const cart = await res.json();
+  const count = cart.products.reduce((acc, p) => acc + p.quantity, 0);
+  document.getElementById("cartCount").textContent = count;
+}
+
+// Inicializar contador al cargar la página
+updateCartCount();

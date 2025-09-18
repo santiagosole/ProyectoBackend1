@@ -3,19 +3,20 @@ import Cart from "../models/Cart.js";
 
 export const getProductsView = async (req, res) => {
   try {
-    const products = await Product.find().lean();
-
-    let cart = await Cart.findOne();
+    // Buscamos un carrito existente o creamos uno nuevo
+    let cart = await Cart.findOne().lean(); // Aquí podés adaptarlo según usuario si hay login
     if (!cart) {
-      cart = await Cart.create({ products: [] });
+      const newCart = new Cart({ products: [] });
+      cart = await newCart.save();
     }
 
-    res.render("home", {
-      products,
-      cartId: cart._id.toString(),
-      title: "Inicio"
-    });
+    // Traemos los productos
+    const products = await Product.find().lean();
+
+    // Renderizamos home y pasamos products y cartId
+    res.render("home", { products, cartId: cart._id });
   } catch (err) {
+    console.error(err);
     res.status(500).send("Error al cargar productos");
   }
 };
