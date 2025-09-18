@@ -1,168 +1,36 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inicio - Mi Tienda</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light d-flex flex-column min-vh-100">
+<h1 class="mb-4">Productos</h1>
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand" href="/">Mi Tienda</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto align-items-center">
-          <li class="nav-item"><a class="nav-link" href="/products">Productos</a></li>
-          <li class="nav-item"><a class="nav-link" href="/realTimeProducts">Realtime Products</a></li>
-
-          <!-- Dropdown carrito -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Carrito <span id="cartCount" class="badge bg-danger">0</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end p-3" style="min-width: 300px;">
-              <div id="cartItems">
-                <p class="text-center">Cargando carrito...</p>
-              </div>
-              <div class="dropdown-divider"></div>
-              <p class="text-end fw-bold">Total: $<span id="cartTotal">0</span></p>
-              <a href="/carts/{{cartId}}" class="btn btn-primary w-100">Ver Carrito</a>
-            </ul>
-          </li>
-        </ul>
+<div class="row">
+  {{#each products}}
+    <div class="col-md-4 mb-3">
+      <div class="card">
+        <img src="{{this.thumbnails.[0]}}" class="card-img-top" alt="{{this.title}}">
+        <div class="card-body">
+          <h5 class="card-title">{{this.title}}</h5>
+          <p class="card-text">${{this.price}}</p>
+          <button class="btn btn-primary add-to-cart" data-id="{{this._id}}">Agregar al carrito</button>
+        </div>
       </div>
     </div>
-  </nav>
+  {{/each}}
+</div>
 
-  <!-- Contenido -->
-  <div class="container my-5">
-    <h1 class="text-center mb-4">Lista de Productos</h1>
-
-    <div class="row" id="productList">
-      {{#each products}}
-        <div class="col-md-4 mb-4">
-          <div class="card shadow-sm h-100">
-            {{#if this.thumbnails.[0]}}
-              <img src="{{this.thumbnails.[0]}}" class="card-img-top" alt="{{this.title}}">
-            {{else}}
-              <img src="https://via.placeholder.com/300x200.png?text=Sin+Imagen" class="card-img-top" alt="Imagen no disponible">
-            {{/if}}
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{this.title}}</h5>
-              <p class="card-text">{{this.description}}</p>
-              <p class="fw-bold text-primary mb-1">Precio: ${{this.price}}</p>
-              <p class="text-muted mb-1">Stock: {{this.stock}}</p>
-              <p class="text-muted">Categoría: {{this.category}}</p>
-              <div class="mt-auto">
-                <button class="btn btn-sm btn-dark addToCart" data-id="{{this._id}}">Agregar al carrito</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      {{/each}}
-    </div>
-
-    <!-- Paginación -->
-    <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center">
-        {{#if pagination.hasPrevPage}}
-          <li class="page-item">
-            <a class="page-link" href="{{pagination.prevLink}}">Anterior</a>
-          </li>
-        {{else}}
-          <li class="page-item disabled"><span class="page-link">Anterior</span></li>
-        {{/if}}
-
-        <li class="page-item active"><span class="page-link">{{pagination.page}}</span></li>
-
-        {{#if pagination.hasNextPage}}
-          <li class="page-item">
-            <a class="page-link" href="{{pagination.nextLink}}">Siguiente</a>
-          </li>
-        {{else}}
-          <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
-        {{/if}}
-      </ul>
-    </nav>
-  </div>
-
-  <!-- Footer -->
-  <footer class="bg-dark text-white text-center py-3 mt-auto">
-    <p class="mb-0">&copy; 2025 Mi Tienda - Todos los derechos reservados</p>
-  </footer>
-
-  <!-- JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+<script>
 const cartId = "{{cartId}}";
 
-// FUNCION PARA CARGAR EL CARRITO
-async function fetchCart() {
-  try {
-    const res = await fetch(`/api/carts/${cartId}`);
-    const data = await res.json();
-    const cartItemsContainer = document.getElementById("cartItems");
-    const cartCount = document.getElementById("cartCount");
-    const cartTotal = document.getElementById("cartTotal");
-
-    if (!data.products || data.products.length === 0) {
-      cartItemsContainer.innerHTML = '<p class="text-center">Carrito vacío</p>';
-      cartCount.textContent = 0;
-      cartTotal.textContent = 0;
-      return;
-    }
-
-    let itemsHTML = "";
-    let total = 0;
-    data.products.forEach(item => {
-      const subtotal = item.product.price * item.quantity;
-      total += subtotal;
-
-      itemsHTML += `
-        <div class="d-flex align-items-center mb-2" data-id="${item.product._id}">
-          <img src="${item.product.thumbnails[0] || 'https://via.placeholder.com/50'}" width="50" class="me-2">
-          <div class="flex-grow-1">
-            <p class="mb-0">${item.product.title}</p>
-            <small>$${item.product.price} x ${item.quantity} = $${subtotal}</small>
-          </div>
-          <button class="btn btn-sm btn-danger removeBtn">X</button>
-        </div>
-      `;
-    });
-
-    cartItemsContainer.innerHTML = itemsHTML;
-    cartCount.textContent = data.products.length;
-    cartTotal.textContent = total;
-
-    // ELIMINAR PRODUCTOS DEL CARRITO
-    document.querySelectorAll(".removeBtn").forEach(btn => {
-      btn.addEventListener("click", async (e) => {
-        const productId = e.target.closest("div").dataset.id;
-        await fetch(`/api/carts/${cartId}/product/${productId}`, { method: "DELETE" });
-        fetchCart(); // recarga el carrito
+document.querySelectorAll(".add-to-cart").forEach(btn => {
+  btn.addEventListener("click", async (e) => {
+    const pid = e.target.dataset.id;
+    try {
+      await fetch(`/api/carts/${cartId}/product/${pid}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: 1 })
       });
-    });
-
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-// AGREGAR PRODUCTO AL CARRITO
-document.querySelectorAll(".addToCart").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const productId = btn.dataset.id;
-    await fetch(`/api/carts/${cartId}/product/${productId}`, { method: "POST" });
-    fetchCart();
+      alert("Producto agregado al carrito");
+    } catch (err) {
+      console.error(err);
+    }
   });
 });
-
-// Inicializar
-fetchCart();
-setInterval(fetchCart, 5000); // actualiza cada 5s
 </script>
-
-</body>
-</html>

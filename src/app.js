@@ -7,10 +7,11 @@ import dotenv from "dotenv";
 
 import { connectDB } from './config/db.js';
 import productsRouter from './routes/products.routes.js';
+import cartsRouter from './routes/carts.routes.js';
 import { getProductsView } from "./controllers/products.controller.js";
+import { getCartView } from "./controllers/carts.controller.js";
 import Product from "./models/Product.js";
-import cartsRouter from "./routes/carts.routes.js";
-import Cart from "./models/Cart.js"; 
+import Cart from "./models/Cart.js";
 
 dotenv.config();
 
@@ -25,10 +26,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public"))); 
 
-// Handlebars con helpers
+// Handlebars con layout y helpers
 app.engine(
   "handlebars",
   engine({
+    defaultLayout: "main",
     helpers: {
       ifEquals: (a, b, options) => a === b ? options.fn(this) : options.inverse(this),
       multiply: (a, b) => a * b,
@@ -38,8 +40,6 @@ app.engine(
     }
   })
 );
-
-
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
@@ -50,11 +50,10 @@ connectDB();
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 
-// Vista Home
+// Vistas
 app.get("/", getProductsView);
-
-// Vista Productos
 app.get("/products", getProductsView);
+app.get("/carts/:cid", getCartView);
 
 // Real Time Products
 app.get("/realTimeProducts", async (req, res) => {
@@ -63,31 +62,6 @@ app.get("/realTimeProducts", async (req, res) => {
     res.render("realTimeProducts", { products });
   } catch (err) {
     res.status(500).send("Error al cargar productos");
-  }
-});
-
-app.get("/carts/:cid", async (req, res) => {
-  try {
-    const cart = await Cart.findById(req.params.cid)
-      .populate("products.product")
-      .lean();
-
-    if (!cart) return res.status(404).send("Carrito no encontrado");
-
-    const validProducts = cart.products.filter(item => item.product);
-
-    const total = validProducts.reduce(
-      (acc, item) => acc + item.product.price * item.quantity,
-      0
-    );
-
-    res.render("carts/cart", {
-      products: validProducts,
-      total
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error al cargar carrito");
   }
 });
 
