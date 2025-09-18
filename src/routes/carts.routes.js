@@ -3,7 +3,7 @@ import Cart from "../models/Cart.js";
 
 const router = Router();
 
-// Obtener carrito por ID
+// GET cart
 router.get("/:cid", async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.cid).populate("products.product");
@@ -14,14 +14,17 @@ router.get("/:cid", async (req, res) => {
   }
 });
 
-// Actualizar carrito completo (envío de cantidades desde el frontend)
-router.put("/:cid", async (req, res) => {
+// POST add product (one-by-one) - used by add-to-cart button
+router.post("/:cid/product/:pid", async (req, res) => {
   try {
-    const { products } = req.body; // [{ productId, quantity }, ...]
-    const cart = await Cart.findById(req.params.cid);
+    const { cid, pid } = req.params;
+    const cart = await Cart.findById(cid);
     if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
 
-    cart.products = products.map(p => ({ product: p.productId, quantity: p.quantity }));
+    const existing = cart.products.find(p => p.product.toString() === pid);
+    if (existing) existing.quantity += 1;
+    else cart.products.push({ product: pid, quantity: 1 });
+
     await cart.save();
     await cart.populate("products.product");
     res.json(cart);
@@ -30,25 +33,14 @@ router.put("/:cid", async (req, res) => {
   }
 });
 
-// Actualizar cantidad de un producto específico
-router.put("/:cid/product/:pid", async (req, res) => {
+// PUT update whole cart (used by "Actualizar carrito" button)
+router.put("/:cid", async (req, res) => {
   try {
-    const { quantity } = req.body; // cantidad nueva
+    const { products } = req.body; // [{ productId, quantity }]
     const cart = await Cart.findById(req.params.cid);
     if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
 
-    const itemIndex = cart.products.findIndex(p => p.product.toString() === req.params.pid);
-
-    if (itemIndex > -1) {
-      if (quantity <= 0) {
-        cart.products.splice(itemIndex, 1); // eliminar si qty <= 0
-      } else {
-        cart.products[itemIndex].quantity = quantity;
-      }
-    } else if (quantity > 0) {
-      cart.products.push({ product: req.params.pid, quantity });
-    }
-
+    cart.products = (products || []).map(p => ({ product: p.productId, quantity: p.quantity }));
     await cart.save();
     await cart.populate("products.product");
     res.json(cart);
