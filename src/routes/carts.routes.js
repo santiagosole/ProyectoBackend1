@@ -63,4 +63,20 @@ router.delete("/:cid", async (req, res) => {
   }
 });
 
+
+// DELETE producto individual
+router.delete("/:cid/products/:pid", async (req, res) => {
+  try {
+    const cart = await Cart.findById(req.params.cid);
+    if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
+
+    cart.products = cart.products.filter(p => p.product.toString() !== req.params.pid);
+    await cart.save();
+    await cart.populate("products.product");
+    res.json(cart);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

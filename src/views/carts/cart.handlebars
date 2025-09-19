@@ -3,7 +3,13 @@
 {{#if products.length}}
 <table class="table">
   <thead>
-    <tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr>
+    <tr>
+      <th>Producto</th>
+      <th>Precio</th>
+      <th>Cantidad</th>
+      <th>Subtotal</th>
+      <th>Acción</th>
+    </tr>
   </thead>
   <tbody id="cartBody">
     {{#each products}}
@@ -12,16 +18,18 @@
       <td>${{this.product.price}}</td>
       <td><input class="form-control quantity-input" type="number" value="{{this.quantity}}" min="0"></td>
       <td class="subtotal">${{multiply this.product.price this.quantity}}</td>
+      <td>
+        <button class="btn btn-danger btn-sm remove-product">Eliminar</button>
+      </td>
     </tr>
     {{/each}}
   </tbody>
 </table>
 
 <h3>Total: $<span id="cartTotal">{{total}}</span></h3>
-<div class="d-flex gap-2">
-  <button id="updateCartBtn" class="btn btn-primary">Actualizar carrito</button>
-  <button id="clearCartBtn" class="btn btn-danger">Vaciar carrito</button>
-</div>
+<button id="updateCartBtn" class="btn btn-primary">Actualizar carrito</button>
+<button id="clearCartBtn" class="btn btn-warning">Vaciar carrito</button>
+
 {{else}}
 <p>Tu carrito está vacío.</p>
 {{/if}}

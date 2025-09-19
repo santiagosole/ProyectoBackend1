@@ -8,10 +8,6 @@
   const cartId = getCartIdFromLink();
   if (!cartId) return;
 
-  // Toast de Bootstrap
-  const toastEl = document.getElementById("cartToast");
-  const toast = toastEl ? new bootstrap.Toast(toastEl) : null;
-
   async function updateCartCount() {
     try {
 const res = await fetch(`/api/carts/${cartId}`);
@@ -20,9 +16,7 @@ const res = await fetch(`/api/carts/${cartId}`);
       const count = cart.products.reduce((acc, p) => acc + p.quantity, 0);
       const el = document.getElementById("cartCount");
       if (el) el.textContent = count;
-    } catch (err) {
-      console.error("updateCartCount error", err);
-    }
+    } catch (err) { console.error(err); }
   }
 
   function bindAddButtons() {
@@ -33,11 +27,10 @@ const res = await fetch(`/api/carts/${cartId}`);
 const res = await fetch(`/api/carts/${cartId}/product/${pid}`, { 
   method: "POST" 
 });
-          if (!res.ok) throw new Error("No se pudo agregar");
-          if (toast) toast.show(); // mostramos el toast en vez del alert
+          if (!res.ok) throw new Error();
           updateCartCount();
         } catch (err) {
-          console.error("addToCart error", err);
+          console.error(err);
           alert("Error al agregar producto");
         }
       });
@@ -61,16 +54,34 @@ await fetch(`/api/carts/${cartId}`, {
     window.location.reload();
   }
 
- async function clearCart() {
-  try {
-    const res = await fetch(`/api/carts/${cartId}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("No se pudo vaciar");
-    window.location.reload();
-  } catch (err) {
-    console.error("clearCart error", err);
-    alert("Error al vaciar carrito");
+  async function clearCart() {
+    try {
+      const res = await fetch(`/api/carts/${cartId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Error al vaciar carrito");
+    }
   }
-}
+
+  // Eliminar un producto individual
+  function bindRemoveButtons() {
+    document.querySelectorAll(".remove-product").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const row = btn.closest("tr");
+        const pid = row.dataset.id;
+        try {
+          const res = await fetch(`/api/carts/${cartId}/products/${pid}`, { method: "DELETE" });
+          if (!res.ok) throw new Error();
+          window.location.reload();
+        } catch (err) {
+          console.error(err);
+          alert("Error al eliminar producto");
+        }
+      });
+    });
+  }
 
   const updateBtn = document.getElementById("updateCartBtn");
   if (updateBtn) updateBtn.addEventListener("click", sendCartUpdate);
@@ -79,5 +90,6 @@ await fetch(`/api/carts/${cartId}`, {
   if (clearBtn) clearBtn.addEventListener("click", clearCart);
 
   bindAddButtons();
+  bindRemoveButtons();
   updateCartCount();
 })();
