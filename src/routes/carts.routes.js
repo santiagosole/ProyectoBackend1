@@ -49,4 +49,18 @@ router.put("/:cid", async (req, res) => {
   }
 });
 
+// DELETE empty cart
+router.delete("/:cid", async (req, res) => {
+  try {
+    const cart = await Cart.findById(req.params.cid);
+    if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
+
+    cart.products = [];
+    await cart.save();
+    res.json({ message: "Carrito vaciado" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

@@ -18,7 +18,10 @@
 </table>
 
 <h3>Total: $<span id="cartTotal">{{total}}</span></h3>
-<button id="updateCartBtn" class="btn btn-primary">Actualizar carrito</button>
+<div class="d-flex gap-2">
+  <button id="updateCartBtn" class="btn btn-primary">Actualizar carrito</button>
+  <button id="clearCartBtn" class="btn btn-danger">Vaciar carrito</button>
+</div>
 {{else}}
 <p>Tu carrito está vacío.</p>
 {{/if}}

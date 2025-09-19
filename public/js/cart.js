@@ -8,13 +8,12 @@
   const cartId = getCartIdFromLink();
 
   if (!cartId) {
-    // no hay cartId; no hacemos nada
     return;
   }
 
   async function updateCartCount() {
     try {
-      const res = await fetch(`/api/carts/${cartId}`);
+const res = await fetch(`/api/carts/${cartId}`);
       if (!res.ok) return;
       const cart = await res.json();
       const count = cart.products.reduce((acc, p) => acc + p.quantity, 0);
@@ -25,15 +24,15 @@
     }
   }
 
-  // add-to-cart buttons
   function bindAddButtons() {
     document.querySelectorAll(".add-to-cart").forEach(btn => {
-      btn.addEventListener("click", async (e) => {
+      btn.addEventListener("click", async () => {
         const pid = btn.dataset.id;
         try {
-          const res = await fetch(`/api/carts/${cartId}/product/${pid}`, { method: "POST" });
+const res = await fetch(`/api/carts/${cartId}/product/${pid}`, { 
+  method: "POST" 
+});
           if (!res.ok) throw new Error("No se pudo agregar");
-          // opcional: mostrar alert como antes
           alert("Producto agregado al carrito");
           updateCartCount();
         } catch (err) {
@@ -44,7 +43,6 @@
     });
   }
 
-  // actualizar todo el carrito desde la vista de carrito
   async function sendCartUpdate() {
     const rows = document.querySelectorAll("#cartBody tr");
     const products = [];
@@ -54,23 +52,33 @@
       const qty = qtyInput ? parseInt(qtyInput.value) : 0;
       products.push({ productId: pid, quantity: qty });
     });
-    await fetch(`/api/carts/${cartId}`, {
+await fetch(`/api/carts/${cartId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ products })
     });
-    // recargar para ver subtotales recalculados
     window.location.reload();
   }
 
-  // bind update button in cart view
+  async function clearCart() {
+  try {
+    const res = await fetch(`/api/carts/${cartId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("No se pudo vaciar");
+    alert("Carrito vaciado");
+    window.location.reload();
+  } catch (err) {
+    console.error("clearCart error", err);
+    alert("Error al vaciar carrito");
+  }
+}
+
+
   const updateBtn = document.getElementById("updateCartBtn");
   if (updateBtn) updateBtn.addEventListener("click", sendCartUpdate);
 
-  // initial setup
+  const clearBtn = document.getElementById("clearCartBtn");
+  if (clearBtn) clearBtn.addEventListener("click", clearCart);
+
   bindAddButtons();
   updateCartCount();
-
-  // If cart page loaded, also refresh table after page load (so dynamic buttons are bound)
-  // (no-op if not on cart view)
 })();
