@@ -6,10 +6,11 @@
     return href.split("/carts/")[1] || null;
   }
   const cartId = getCartIdFromLink();
+  if (!cartId) return;
 
-  if (!cartId) {
-    return;
-  }
+  // Toast de Bootstrap
+  const toastEl = document.getElementById("cartToast");
+  const toast = toastEl ? new bootstrap.Toast(toastEl) : null;
 
   async function updateCartCount() {
     try {
@@ -33,7 +34,7 @@ const res = await fetch(`/api/carts/${cartId}/product/${pid}`, {
   method: "POST" 
 });
           if (!res.ok) throw new Error("No se pudo agregar");
-          alert("Producto agregado al carrito");
+          if (toast) toast.show(); // mostramos el toast en vez del alert
           updateCartCount();
         } catch (err) {
           console.error("addToCart error", err);
@@ -60,18 +61,16 @@ await fetch(`/api/carts/${cartId}`, {
     window.location.reload();
   }
 
-  async function clearCart() {
+ async function clearCart() {
   try {
     const res = await fetch(`/api/carts/${cartId}`, { method: "DELETE" });
     if (!res.ok) throw new Error("No se pudo vaciar");
-    alert("Carrito vaciado");
     window.location.reload();
   } catch (err) {
     console.error("clearCart error", err);
     alert("Error al vaciar carrito");
   }
 }
-
 
   const updateBtn = document.getElementById("updateCartBtn");
   if (updateBtn) updateBtn.addEventListener("click", sendCartUpdate);
