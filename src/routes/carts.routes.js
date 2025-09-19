@@ -3,7 +3,6 @@ import Cart from "../models/Cart.js";
 
 const router = Router();
 
-// GET cart
 router.get("/:cid", async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.cid).populate("products.product");
@@ -14,7 +13,6 @@ router.get("/:cid", async (req, res) => {
   }
 });
 
-// POST add product (one-by-one) - used by add-to-cart button
 router.post("/:cid/product/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
@@ -33,10 +31,9 @@ router.post("/:cid/product/:pid", async (req, res) => {
   }
 });
 
-// PUT update whole cart (used by "Actualizar carrito" button)
 router.put("/:cid", async (req, res) => {
   try {
-    const { products } = req.body; // [{ productId, quantity }]
+    const { products } = req.body; 
     const cart = await Cart.findById(req.params.cid);
     if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
 
@@ -49,7 +46,6 @@ router.put("/:cid", async (req, res) => {
   }
 });
 
-// DELETE empty cart
 router.delete("/:cid", async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.cid);
@@ -64,7 +60,6 @@ router.delete("/:cid", async (req, res) => {
 });
 
 
-// DELETE producto individual
 router.delete("/:cid/products/:pid", async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.cid);

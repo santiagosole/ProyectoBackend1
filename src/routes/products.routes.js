@@ -5,7 +5,6 @@ import { getProductsView } from "../controllers/products.controller.js";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  // También dejamos la API simple si la usás en algún lado
   try {
     const products = await Product.find().lean();
     res.json(products);
