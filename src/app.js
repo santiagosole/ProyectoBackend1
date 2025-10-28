@@ -8,10 +8,12 @@ import dotenv from "dotenv";
 import { connectDB } from './config/db.js';
 import productsRouter from './routes/products.routes.js';
 import cartsRouter from './routes/carts.routes.js';
+import authRouter from './routes/auth.routes.js'; // <-- nuevo router de login/registro
 import { getProductsView } from "./controllers/products.controller.js";
 import { getCartView } from "./controllers/carts.controller.js";
 import Product from "./models/Product.js";
 import Cart from "./models/Cart.js";
+import { sessionMiddleware } from "./config/session.js"; // <-- middleware de sesión
 
 dotenv.config();
 
@@ -21,24 +23,33 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
+app.use(sessionMiddleware); // <-- habilita sesiones
 
+// Handlebars
 app.engine("handlebars", engine({
   defaultLayout: "main",
   helpers: {
-    multiply: (a,b) => a*b
+    multiply: (a, b) => a * b
   }
 }));
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
+// conectar DB
 connectDB();
 
+// rutas API existentes
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 
+// nuevas rutas de autenticación
+app.use("/", authRouter); // login, register, logout
+
+// rutas vistas
 app.get("/", getProductsView);
 app.get("/products", getProductsView);
 app.get("/carts/:cid", getCartView);
@@ -52,6 +63,7 @@ app.get("/realTimeProducts", async (req, res) => {
   }
 });
 
+// levantar servidor y socket.io
 const server = app.listen(PORT, () => console.log(`🚀 Servidor en http://localhost:${PORT}`));
 const io = new Server(server);
 

@@ -3,18 +3,12 @@ import MongoStore from "connect-mongo";
 import dotenv from "dotenv";
 dotenv.config();
 
-const mongoUrl = process.env.MONGO_URL;
-const secret = process.env.SESSION_SECRET || "coderSecret";
-
 export const sessionMiddleware = session({
   store: MongoStore.create({
-    mongoUrl,
-    ttl: 60 * 60, // 1 hora en segundos
+    mongoUrl: process.env.MONGO_URI, // <--- usar MONGO_URI
+    ttl: 14 * 24 * 60 * 60 // duración de la sesión en segundos (opcional)
   }),
-  secret,
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 1000 * 60 * 60 // 1 hora en ms
-  }
+  saveUninitialized: false
 });
