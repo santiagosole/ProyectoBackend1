@@ -1,12 +1,26 @@
 {{> header}}
+
+<header>
+  {{#if user}}
+    <p>Bienvenido, {{user.name}} ({{user.role}})</p>
+    <form action="/logout" method="POST" style="display:inline;">
+      <button type="submit">Cerrar sesión</button>
+    </form>
+  {{else}}
+    <a href="/login">Iniciar sesión</a> | 
+    <a href="/register">Registrarse</a>
+  {{/if}}
+</header>
+
 <h1>Productos</h1>
 <ul>
-{{#each products}}
+  {{#each products}}
     <li>
-        <strong>{{this.title}}</strong> - ${{this.price}}<br>
-        {{this.description}}<br>
-        <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" width="100">
+      <strong>{{this.title}}</strong> - ${{this.price}}<br>
+      {{this.description}}<br>
+      <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" width="100">
     </li>
-{{/each}}
+  {{/each}}
 </ul>
+
 <a href="/products/new">Agregar nuevo producto</a>
