@@ -1,3 +1,4 @@
+// src/routes/carts.routes.js
 import { Router } from "express";
 import Cart from "../models/Cart.js";
 
@@ -13,11 +14,12 @@ router.get("/:cid", async (req, res) => {
   }
 });
 
+// ===== Cambio aquí: redirigir al listado de productos =====
 router.post("/:cid/product/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
     const cart = await Cart.findById(cid);
-    if (!cart) return res.status(404).json({ error: "Carrito no encontrado" });
+    if (!cart) return res.status(404).send("Carrito no encontrado");
 
     const existing = cart.products.find(p => p.product.toString() === pid);
     if (existing) existing.quantity += 1;
@@ -25,9 +27,11 @@ router.post("/:cid/product/:pid", async (req, res) => {
 
     await cart.save();
     await cart.populate("products.product");
-    res.json(cart);
+
+    // Redirige al listado de productos en vez de devolver JSON
+    res.redirect("/products");
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).send(err.message);
   }
 });
 
@@ -58,7 +62,6 @@ router.delete("/:cid", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 router.delete("/:cid/products/:pid", async (req, res) => {
   try {

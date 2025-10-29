@@ -13,14 +13,25 @@
 </header>
 
 <h1>Productos</h1>
-<ul>
+
+<div class="products-container" style="display:flex; flex-wrap: wrap; gap: 20px;">
   {{#each products}}
-    <li>
-      <strong>{{this.title}}</strong> - ${{this.price}}<br>
-      {{this.description}}<br>
-      <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" width="100">
-    </li>
+    <div class="product-card" style="border: 1px solid #ccc; padding: 10px; width: 200px;">
+      <h3>{{this.title}}</h3>
+      <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" width="150" style="display:block; margin-bottom: 10px;">
+      <p>{{this.description}}</p>
+      <p><strong>Precio: ${{this.price}}</strong></p>
+
+      <!-- Form para agregar al carrito -->
+      {{#if ../cartId}}
+        <form action="/api/carts/{{../cartId}}/product/{{this._id}}" method="POST">
+          <button type="submit">Agregar al carrito</button>
+        </form>
+      {{else}}
+        <p>Error: carrito no disponible</p>
+      {{/if}}
+    </div>
   {{/each}}
-</ul>
+</div>
 
 <a href="/products/new">Agregar nuevo producto</a>

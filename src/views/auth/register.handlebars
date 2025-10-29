@@ -1,11 +1,16 @@
 {{> header}}
 
-<h1>Registro de usuario</h1>
+<h1>Registrarse</h1>
 
 <form action="/register" method="POST">
   <div>
-    <label for="name">Nombre:</label>
-    <input type="text" id="name" name="name" required>
+    <label for="first_name">Nombre:</label>
+    <input type="text" id="first_name" name="first_name" required>
+  </div>
+
+  <div>
+    <label for="last_name">Apellido:</label>
+    <input type="text" id="last_name" name="last_name" required>
   </div>
 
   <div>
@@ -21,4 +26,11 @@
   <button type="submit">Registrarse</button>
 </form>
 
-<p>¿Ya tenés cuenta? <a href="/login">Iniciá sesión aquí</a></p>
+<p>¿Ya tenés cuenta? <a href="/login">Iniciar sesión</a></p>
+
+<hr>
+
+<!-- Botón para autenticación con GitHub -->
+<a href="/auth/github">
+  <button>Registrarse o Iniciar sesión con GitHub</button>
+</a>
