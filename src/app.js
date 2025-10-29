@@ -8,12 +8,15 @@ import dotenv from "dotenv";
 import { connectDB } from './config/db.js';
 import productsRouter from './routes/products.routes.js';
 import cartsRouter from './routes/carts.routes.js';
-import authRouter from './routes/auth.routes.js'; // <-- nuevo router de login/registro
+import authRouter from './routes/auth.routes.js'; // rutas login/registro
 import { getProductsView } from "./controllers/products.controller.js";
 import { getCartView } from "./controllers/carts.controller.js";
 import Product from "./models/Product.js";
 import Cart from "./models/Cart.js";
-import { sessionMiddleware } from "./config/session.js"; // <-- middleware de sesión
+
+import { sessionMiddleware } from "./config/session.js"; // sesiones
+import passport from "passport";
+import { initializePassport } from "./config/passport.js"; // Passport strategies
 
 dotenv.config();
 
@@ -23,13 +26,18 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// middlewares
+// ===== Middlewares =====
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
-app.use(sessionMiddleware); // <-- habilita sesiones
+app.use(sessionMiddleware); // habilita sesiones
 
-// Handlebars
+// ===== Passport =====
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ===== Handlebars =====
 app.engine("handlebars", engine({
   defaultLayout: "main",
   helpers: {
@@ -39,17 +47,17 @@ app.engine("handlebars", engine({
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
-// conectar DB
+// ===== Conectar DB =====
 connectDB();
 
-// rutas API existentes
+// ===== Rutas API =====
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 
-// nuevas rutas de autenticación
-app.use("/", authRouter); // login, register, logout
+// ===== Rutas autenticación =====
+app.use("/", authRouter); // login, register, logout, GitHub
 
-// rutas vistas
+// ===== Rutas vistas =====
 app.get("/", getProductsView);
 app.get("/products", getProductsView);
 app.get("/carts/:cid", getCartView);
@@ -63,7 +71,7 @@ app.get("/realTimeProducts", async (req, res) => {
   }
 });
 
-// levantar servidor y socket.io
+// ===== Servidor y socket.io =====
 const server = app.listen(PORT, () => console.log(`🚀 Servidor en http://localhost:${PORT}`));
 const io = new Server(server);
 

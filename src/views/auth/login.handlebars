@@ -2,6 +2,10 @@
 
 <h1>Iniciar sesión</h1>
 
+{{#if error}}
+  <p style="color:red;">{{error}}</p>
+{{/if}}
+
 <form action="/login" method="POST">
   <div>
     <label for="email">Correo:</label>
@@ -17,3 +21,10 @@
 </form>
 
 <p>¿No tenés cuenta? <a href="/register">Registrate aquí</a></p>
+
+<hr>
+
+<h3>O iniciar sesión con:</h3>
+<a href="/auth/github">
+  <button>GitHub</button>
+</a>

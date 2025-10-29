@@ -1,3 +1,4 @@
+// User.js
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -8,4 +9,5 @@ const userSchema = new mongoose.Schema({
   role: { type: String, default: "user" } // "admin" o "user"
 }, { timestamps: true });
 
-export const UserModel = mongoose.model("User", userSchema);
+export default mongoose.model("User", userSchema);
+
