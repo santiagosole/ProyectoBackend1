@@ -1,4 +1,3 @@
-// src/config/passport.js
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GitHubStrategy } from "passport-github2";
@@ -8,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const initializePassport = () => {
-  // === Local Strategy ===
+  // ===== Local Strategy =====
   passport.use(
     "local",
     new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
@@ -26,7 +25,7 @@ export const initializePassport = () => {
     })
   );
 
-  // === GitHub OAuth Strategy ===
+  // ===== GitHub OAuth Strategy =====
   passport.use(
     new GitHubStrategy(
       {
@@ -36,25 +35,28 @@ export const initializePassport = () => {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let user = await User.findOne({ email: profile._json.email });
+          // A veces el email puede no venir directo, revisar GitHub
+          const email = profile.emails?.[0]?.value || `${profile.username}@github.com`;
+
+          let user = await User.findOne({ email });
           if (!user) {
             user = await User.create({
               first_name: profile.username,
               last_name: "",
-              email: profile._json.email,
-              password: "", // GitHub OAuth no necesita password
+              email,
+              password: "", // no necesita password
               role: "user",
             });
           }
           return done(null, user);
         } catch (err) {
-          done(err);
+          return done(err);
         }
       }
     )
   );
 
-  // === Serialización ===
+  // ===== Serialización =====
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id, done) => {
     try {
