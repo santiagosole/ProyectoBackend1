@@ -13,7 +13,7 @@ router.post("/register", async (req, res) => {
 
   try {
     const exists = await User.findOne({ email });
-    if (exists) return res.status(400).send("El usuario ya existe");
+    if (exists) return res.redirect("/users/register?error=El usuario ya existe");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
@@ -23,10 +23,12 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
     });
 
-    res.status(201).send({ message: "Usuario creado", user: newUser });
+    console.log("✅ Usuario creado:", newUser.email);
+    // 🔹 En lugar de devolver JSON, redirigimos al login
+    res.redirect("/users/login?success=Usuario creado correctamente");
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Error al registrar usuario");
+    console.error("❌ Error al registrar usuario:", error);
+    res.redirect("/users/register?error=Error al registrar usuario");
   }
 });
 
@@ -36,42 +38,33 @@ router.post("/login", async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.redirect("/users/login?error=Login failed!");
+    if (!user) return res.redirect("/users/login?error=Usuario no encontrado");
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.redirect("/users/login?error=Login failed!");
+    if (!valid) return res.redirect("/users/login?error=Contraseña incorrecta");
 
-    // 🧩 Acá incluimos también el first_name y last_name en el token
     const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-        first_name: user.first_name,
-        last_name: user.last_name,
-      },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Guardamos cookie firmada
     res.cookie("currentUser", token, {
       httpOnly: true,
       signed: true,
     });
 
-    // Redirige a la vista del usuario actual
     res.redirect("/users/current");
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Error en el login");
+    console.error("❌ Error en login:", error);
+    res.redirect("/users/login?error=Error al iniciar sesión");
   }
 });
 
 // ✅ Logout
 router.get("/logout", (req, res) => {
   res.clearCookie("currentUser");
-  res.redirect("/users/login");
+  res.redirect("/users/login?success=Sesión cerrada correctamente");
 });
 
 export default router;

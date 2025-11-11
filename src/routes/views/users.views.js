@@ -3,29 +3,29 @@ import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
-// 🧩 Página de login
+// 🧭 Renderiza formulario de login
 router.get("/login", (req, res) => {
-  const { error } = req.query;
-  res.render("auth/login", { error });
+  const { error, success } = req.query;
+  res.render("auth/login", { error, success });
 });
 
-// 🧩 Página de registro
+// 🧭 Renderiza formulario de registro
 router.get("/register", (req, res) => {
-  res.render("auth/register");
+  const { error } = req.query;
+  res.render("auth/register", { error });
 });
 
-// 🧩 Página de usuario actual (requiere cookie válida)
+// 🧭 Renderiza la vista de usuario actual
 router.get("/current", (req, res) => {
-  const token = req.signedCookies.currentUser;
-
-  if (!token) return res.redirect("/users/login");
-
   try {
-    const userData = jwt.verify(token, process.env.JWT_SECRET);
-    res.render("users/current", userData);
+    const token = req.signedCookies.currentUser;
+    if (!token) return res.redirect("/users/login?error=Sesión expirada");
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    res.render("users/current", decoded);
   } catch (error) {
-    console.error("Error verificando token:", error);
-    res.redirect("/users/login");
+    console.error("Error en /current:", error);
+    res.redirect("/users/login?error=Token inválido");
   }
 });
 
