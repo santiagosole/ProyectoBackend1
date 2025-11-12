@@ -5,47 +5,39 @@ import User from "../../models/User.model.js";
 
 const router = Router();
 
-// 🔐 Registrar nuevo usuario
+// ✅ Registro de usuario
 router.post("/register", async (req, res) => {
   try {
     const { first_name, last_name, email, age, password } = req.body;
 
-    // Validación básica
-    if (!first_name || !last_name || !email || !password) {
-      return res.status(400).json({ message: "Faltan datos obligatorios." });
-    }
-
-    // Verificar si el usuario ya existe
+    // Verificar si ya existe
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "El usuario ya existe. Iniciá sesión." });
+      return res.status(400).render("auth/register", {
+        error: "⚠️ El usuario ya existe, por favor iniciá sesión."
+      });
     }
 
-    // Encriptar contraseña
+    // Crear usuario
     const hashedPassword = bcrypt.hashSync(password, 10);
-
-    // Crear nuevo usuario
-    const newUser = await User.create({
+    const newUser = new User({
       first_name,
       last_name,
       email,
       age,
-      password: hashedPassword,
-      role: "user",
+      password: hashedPassword
     });
+    await newUser.save();
 
-    // 🔔 Mostrar alert en el front
-    // En lugar de devolver el JSON, redirigimos con un query param
-    return res.redirect(
-      `/users/login?registered=${encodeURIComponent(
-        newUser.first_name
-      )}`
-    );
+    // ✅ Mostrar alert y redirigir al login
+    res.render("auth/registerSuccess", {
+      first_name: newUser.first_name
+    });
   } catch (error) {
-    console.error("❌ Error al registrar usuario:", error);
-    return res.status(500).json({ message: "Error interno del servidor." });
+    console.error("Error en registro:", error);
+    res.status(500).render("auth/register", {
+      error: "❌ Ocurrió un error al registrar el usuario."
+    });
   }
 });
 

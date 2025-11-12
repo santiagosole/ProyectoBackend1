@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", authMiddleware, async (req, res) => {
   const products = await Product.find().lean();
-  res.render("products/products", { products }); // 👈 ajustado al nuevo path
+  res.render("products/products", { products }); 
 });
 
 export default router;

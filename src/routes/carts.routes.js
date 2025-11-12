@@ -1,4 +1,3 @@
-// src/routes/carts.routes.js
 import { Router } from "express";
 import Cart from "../models/Cart.js";
 
@@ -14,7 +13,6 @@ router.get("/:cid", async (req, res) => {
   }
 });
 
-// ===== Cambio aquí: redirigir al listado de productos =====
 router.post("/:cid/product/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
