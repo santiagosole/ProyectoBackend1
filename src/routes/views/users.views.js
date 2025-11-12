@@ -1,34 +1,30 @@
-import { Router } from "express";
+import express from "express";
 import jwt from "jsonwebtoken";
 
-const router = Router();
+const router = express.Router();
 
-// 🟦 Vista de registro
-router.get("/register", (req, res) => {
-  const { error, success, name } = req.query;
-  res.render("auth/register", { error, success, successName: name });
-});
-
-// 🟦 Vista de login
+// ✅ Render de login
 router.get("/login", (req, res) => {
-  const { error, success, name } = req.query;
-  res.render("auth/login", { error, success, successName: name });
+  const error = req.query.error || null;
+  res.render("auth/login", { error });
 });
 
-// 🟦 Vista de perfil del usuario logueado
+// ✅ Render de registro
+router.get("/register", (req, res) => {
+  res.render("auth/register");
+});
+
+// ✅ Vista actual del usuario logueado
 router.get("/current", (req, res) => {
-  const token = req.signedCookies?.currentUser;
-
-  if (!token) {
-    return res.redirect("/users/login?error=Debes iniciar sesión");
-  }
-
   try {
+    const token = req.signedCookies.currentUser;
+    if (!token) return res.redirect("/users/login");
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.render("auth/current", { user: decoded });
-  } catch (err) {
-    console.error("Error decodificando token:", err);
-    res.redirect("/users/login?error=Sesión expirada, volvé a iniciar sesión");
+    res.render("users/current", { user: decoded });
+  } catch (error) {
+    console.error("Token inválido o expirado:", error);
+    res.redirect("/users/login");
   }
 });
 

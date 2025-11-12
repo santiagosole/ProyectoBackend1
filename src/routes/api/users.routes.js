@@ -1,91 +1,73 @@
-import { Router } from "express";
-import User from "../../models/User.model.js";
+import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import User from "../../models/User.model.js"; // ojo, minúscula según tu archivo
+import cookieParser from "cookie-parser";
 
-const router = Router();
+const router = express.Router();
+router.use(cookieParser(process.env.JWT_SECRET));
 
-// 🟩 REGISTRO DE USUARIO
+// ✅ Registro de usuario
 router.post("/register", async (req, res) => {
+  const { first_name, last_name, email, password } = req.body;
+
   try {
-    const { first_name, last_name, email, password } = req.body;
-
-    if (!first_name || !last_name || !email || !password) {
-      return res.redirect("/users/register?error=Todos los campos son obligatorios");
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.redirect("/users/register?error=El usuario ya existe");
-    }
+    const exists = await User.findOne({ email });
+    if (exists)
+      return res.status(400).send({ error: "El usuario ya existe" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
+    const newUser = await User.create({
       first_name,
       last_name,
       email,
       password: hashedPassword,
-      role: "user",
     });
 
-    await newUser.save();
-
-    // ✅ Redirige al login con mensaje de bienvenida
-    res.redirect(
-      `/users/login?success=Usuario creado correctamente&name=${encodeURIComponent(newUser.first_name)}`
-    );
+    res.status(201).send({
+      message: `¡Bienvenido ${first_name}! Gracias por confiar en nosotros. Ahora podés iniciar sesión.`,
+      user: newUser,
+    });
   } catch (error) {
-    console.error("Error en /register:", error);
-    res.redirect("/users/register?error=Error al registrar usuario");
+    console.error(error);
+    res.status(500).send({ error: "Error al registrar usuario" });
   }
 });
 
-// 🟩 LOGIN DE USUARIO
+// ✅ Login de usuario
 router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.redirect("/users/login?error=Usuario no encontrado");
-    }
+    if (!user) return res.redirect("/users/login?error=Credenciales inválidas");
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.redirect("/users/login?error=Contraseña incorrecta");
-    }
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.redirect("/users/login?error=Credenciales inválidas");
 
-    // Crear token JWT
     const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-        first_name: user.first_name,
-      },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Guardar cookie firmada
     res.cookie("currentUser", token, {
       httpOnly: true,
       signed: true,
-      maxAge: 60 * 60 * 1000,
     });
 
-    // Redirige al perfil o página principal
-    res.redirect("/users/current");
+    // 🔁 Redirige a productos directamente al iniciar sesión
+    res.redirect("/products");
   } catch (error) {
-    console.error("Error en /login:", error);
-    res.redirect("/users/login?error=Error interno del servidor");
+    console.error(error);
+    res.status(500).send("Error en el login");
   }
 });
 
-// 🟩 LOGOUT
+// ✅ Logout
 router.get("/logout", (req, res) => {
   res.clearCookie("currentUser");
-  res.redirect("/users/login?success=Sesión cerrada correctamente");
+  res.redirect("/users/login");
 });
 
 export default router;
