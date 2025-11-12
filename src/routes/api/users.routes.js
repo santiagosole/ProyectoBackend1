@@ -5,7 +5,7 @@ import User from "../../models/User.model.js";
 
 const router = Router();
 
-// ✅ Registro de usuario
+//  Registro de usuario
 router.post("/register", async (req, res) => {
   try {
     const { first_name, last_name, email, age, password } = req.body;
@@ -29,7 +29,7 @@ router.post("/register", async (req, res) => {
     });
     await newUser.save();
 
-    // ✅ Mostrar alert y redirigir al login
+    //  Mostrar alert y redirigir al login
     res.render("auth/registerSuccess", {
       first_name: newUser.first_name
     });
