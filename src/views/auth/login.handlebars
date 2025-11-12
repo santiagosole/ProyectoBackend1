@@ -1,17 +1,43 @@
-<h2>Login de Usuario</h2>
+{{> header}}
 
-{{#if error}}
-  <p style="color:red;">{{error}}</p>
-{{/if}}
+<div class="container mt-4">
+  {{#if success}}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{#if successName}}
+        <strong>Bienvenido {{successName}}!</strong> Gracias por confiar en nosotros. Por favor, ingresá tus datos para iniciar sesión.
+      {{else}}
+        {{success}}
+      {{/if}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {{/if}}
 
-<form action="/api/users/login" method="POST">
-  <label>Email:</label>
-  <input type="email" name="email" required>
-  <br>
-  <label>Contraseña:</label>
-  <input type="password" name="password" required>
-  <br>
-  <button type="submit">Ingresar</button>
-</form>
+  {{#if error}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{error}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {{/if}}
 
-<p>¿No tenés cuenta? <a href="/users/register">Registrate</a></p>
+  <h2>Iniciar sesión</h2>
+
+  <form action="/api/users/login" method="POST" class="mt-3">
+    <div class="mb-3">
+      <label>Email:</label>
+      <input type="email" name="email" class="form-control" required />
+    </div>
+
+    <div class="mb-3">
+      <label>Contraseña:</label>
+      <input type="password" name="password" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+  </form>
+
+  <p class="mt-3">
+    ¿No tenés cuenta?
+    <a href="/users/register">Registrate</a>
+  </p>
+</div>
+
