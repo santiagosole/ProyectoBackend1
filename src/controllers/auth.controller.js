@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { UserModel } from "../models/User.js";
 
 const ADMIN_EMAIL = "adminCoder@coder.com";
-const ADMIN_PLAIN_PASS = "admin123"; // si querés cambiar, hacerlo aquí
+const ADMIN_PLAIN_PASS = "admin123"; 
 
 export const getLogin = (req, res) => {
   if (req.session.user) return res.redirect("/products");
@@ -19,7 +19,6 @@ export const postLogin = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.render("login", { error: "Contraseña incorrecta" });
 
-    // Guardar datos útiles en sesión (no guardar password)
     req.session.user = {
       id: user._id,
       name: user.first_name || user.email,
@@ -46,7 +45,6 @@ export const postRegister = async (req, res) => {
     const exists = await UserModel.findOne({ email });
     if (exists) return res.render("register", { error: "El email ya está registrado" });
 
-    // Determinar rol: si coincide EXACTAMENTE con el combo admin, rol = admin
     let role = "user";
     if (email === ADMIN_EMAIL && password === ADMIN_PLAIN_PASS) {
       role = "admin";
@@ -75,7 +73,7 @@ export const logout = (req, res) => {
       console.error("Error destruyendo sesión:", err);
       return res.redirect("/products");
     }
-    res.clearCookie("connect.sid"); // nombre por defecto
+    res.clearCookie("connect.sid"); 
     return res.redirect("/login");
   });
 };
