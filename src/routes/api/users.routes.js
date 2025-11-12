@@ -41,7 +41,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// 🔑 Login de usuario
+//  Login de usuario
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -72,7 +72,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// 👤 Obtener usuario actual
+//  Obtener usuario actual
 router.get("/current", async (req, res) => {
   try {
     const token = req.cookies.jwt;

@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 
-// 📦 Rutas
+//  Rutas
 import productsRouter from "./routes/products.routes.js";
 import cartsRouter from "./routes/carts.routes.js";
 import usersApiRouter from "./routes/api/users.routes.js";
