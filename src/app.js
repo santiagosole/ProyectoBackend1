@@ -1,51 +1,34 @@
-import express from "express";
-import { engine } from "express-handlebars";
-import cookieParser from "cookie-parser";
-import path from "path";
-import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import { connectDB } from "./config/db.js";
-
-//  Rutas
-import productsRouter from "./routes/products.routes.js";
-import cartsRouter from "./routes/carts.routes.js";
-import usersApiRouter from "./routes/api/users.routes.js";
-import usersViewsRouter from "./routes/views/users.views.js";
-
 dotenv.config();
 
-//  Config rutas absolutas
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import express from "express";
+import cookieParser from "cookie-parser";
+import handlebars from "express-handlebars";
+import path from "path";
+import mongoose from "mongoose";
+
+import usersViewsRoutes from "./routes/views/users.views.js";
+import usersApiRoutes from "./routes/api/users.routes.js";
 
 const app = express();
-const PORT = process.env.PORT || 8080;
 
-//  Middlewares globales
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser(process.env.JWT_SECRET));
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.json());
+app.use(cookieParser());
 
-// Configuración de Handlebars
-app.engine("handlebars", engine({ defaultLayout: "main" }));
+app.engine("handlebars", handlebars.engine());
 app.set("view engine", "handlebars");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.resolve("src/views"));
 
-//  Conexión a MongoDB
-connectDB();
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB conectado"))
+  .catch(err => console.error("Error en conexión:", err));
 
-//  Rutas principales
-app.use("/api/products", productsRouter);
-app.use("/api/carts", cartsRouter);
-app.use("/api/users", usersApiRouter);
-app.use("/users", usersViewsRouter);
-app.use("/products", productsRouter);
+app.use("/users", usersViewsRoutes);
+app.use("/api/users", usersApiRoutes);
 
-// Página raíz → redirige a login
-app.get("/", (req, res) => res.redirect("/users/login"));
-
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`✅ Servidor funcionando en http://localhost:${PORT}`);
+app.get("/", (req, res) => {
+  res.redirect("/users/login");
 });
+
+export default app;

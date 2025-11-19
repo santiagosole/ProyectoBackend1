@@ -1,31 +1,21 @@
 import express from "express";
-import jwt from "jsonwebtoken";
+import { auth } from "../../middlewares/auth.js";
 
 const router = express.Router();
 
-// ✅ Render de login
+// Login
 router.get("/login", (req, res) => {
-  const error = req.query.error || null;
-  res.render("auth/login", { error });
+  res.render("auth/login", { error: req.query.error });
 });
 
-// ✅ Render de registro
+// Register
 router.get("/register", (req, res) => {
   res.render("auth/register");
 });
 
-// ✅ Vista actual del usuario logueado
-router.get("/current", (req, res) => {
-  try {
-    const token = req.signedCookies.currentUser;
-    if (!token) return res.redirect("/users/login");
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.render("users/current", { user: decoded });
-  } catch (error) {
-    console.error("Token inválido o expirado:", error);
-    res.redirect("/users/login");
-  }
+// Vista protegida
+router.get("/current", auth, (req, res) => {
+  res.render("users/current", { user: req.user });
 });
 
 export default router;

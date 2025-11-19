@@ -1,3 +1,8 @@
-<h2>Bienvenido, {{first_name}} {{last_name}} 👋</h2>
-<p><strong>Email:</strong> {{email}}</p>
-<p><strong>Rol:</strong> {{role}}</p>
+<h2>Usuario Actual</h2>
+
+<p><strong>Email:</strong> {{user.email}}</p>
+<p><strong>Rol:</strong> {{user.role}}</p>
+
+<form action="/api/users/logout" method="POST">
+  <button type="submit">Cerrar sesión</button>
+</form>

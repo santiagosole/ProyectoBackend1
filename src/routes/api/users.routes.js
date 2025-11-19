@@ -5,21 +5,22 @@ import User from "../../models/User.model.js";
 
 const router = Router();
 
-//  Registro de usuario
+// ==========================
+// REGISTRO
+// ==========================
 router.post("/register", async (req, res) => {
   try {
     const { first_name, last_name, email, age, password } = req.body;
 
-    // Verificar si ya existe
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).render("auth/register", {
-        error: "⚠️ El usuario ya existe, por favor iniciá sesión."
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.render("auth/register", {
+        error: "⚠️ Ya existe un usuario con ese email."
       });
     }
 
-    // Crear usuario
     const hashedPassword = bcrypt.hashSync(password, 10);
+
     const newUser = new User({
       first_name,
       last_name,
@@ -27,66 +28,50 @@ router.post("/register", async (req, res) => {
       age,
       password: hashedPassword
     });
+
     await newUser.save();
 
-    //  Mostrar alert y redirigir al login
     res.render("auth/registerSuccess", {
       first_name: newUser.first_name
     });
+
   } catch (error) {
-    console.error("Error en registro:", error);
-    res.status(500).render("auth/register", {
-      error: "❌ Ocurrió un error al registrar el usuario."
-    });
+    console.error(error);
+    res.render("auth/register", { error: "Error en el registro." });
   }
 });
 
-//  Login de usuario
+// ==========================
+// LOGIN
+// ==========================
 router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user)
-      return res.status(400).json({ message: "Usuario no encontrado." });
+  const user = await User.findOne({ email });
+  if (!user)
+    return res.render("auth/login", { error: "Usuario no encontrado." });
 
-    const isMatch = bcrypt.compareSync(password, user.password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Contraseña incorrecta." });
+  const valid = bcrypt.compareSync(password, user.password);
+  if (!valid)
+    return res.render("auth/login", { error: "Contraseña incorrecta." });
 
-    // Crear token JWT
-    const token = jwt.sign(
-      { id: user._id, role: user.role, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+  const token = jwt.sign(
+    { id: user._id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
 
-    // Guardar token en cookie
-    res.cookie("jwt", token, { httpOnly: true, maxAge: 3600000 });
+  res.cookie("jwt", token, { httpOnly: true, maxAge: 3600000 });
 
-    // Redirigir a productos
-    return res.redirect("/products");
-  } catch (error) {
-    console.error("❌ Error al iniciar sesión:", error);
-    return res.status(500).json({ message: "Error interno del servidor." });
-  }
+  return res.redirect("/users/current");
 });
 
-//  Obtener usuario actual
-router.get("/current", async (req, res) => {
-  try {
-    const token = req.cookies.jwt;
-    if (!token) return res.status(401).json({ message: "No autenticado." });
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-password");
-    if (!user) return res.status(404).json({ message: "Usuario no encontrado." });
-
-    res.json(user);
-  } catch (error) {
-    console.error("❌ Error en /current:", error);
-    return res.status(401).json({ message: "Token inválido o expirado." });
-  }
+// ==========================
+// LOGOUT
+// ==========================
+router.post("/logout", (req, res) => {
+  res.clearCookie("jwt");
+  return res.redirect("/users/login");
 });
 
 export default router;
