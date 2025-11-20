@@ -1,62 +1,76 @@
 import { Router } from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import passport from "passport";
 import User from "../models/User.js";
 
 const router = Router();
 
-// ===== Registro =====
-router.get("/register", (req, res) => res.render("auth/register"));
-
-router.post("/register", async (req, res, next) => {
-  const { first_name, last_name, email, password } = req.body;
-
+// =========================
+// REGISTER
+// =========================
+router.post("/register", async (req, res) => {
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).send("Usuario ya registrado");
+    const { first_name, last_name, email, password, age } = req.body;
+
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(400).json({ error: "Usuario ya existe" });
+
+    const hashed = bcrypt.hashSync(password, 10);
 
     const role = email === "adminCoder@coder.com" ? "admin" : "user";
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ first_name, last_name, email, password: hashedPassword, role });
-    await newUser.save();
-
-    req.login(newUser, (err) => {
-      if (err) return next(err);
-      return res.redirect("/products");
+    const user = await User.create({
+      first_name,
+      last_name,
+      email,
+      age,
+      password: hashed,
+      role,
     });
+
+    res.status(201).json({ message: "Usuario creado", user });
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 });
 
-// ===== Login =====
-router.get("/login", (req, res) => res.render("auth/login"));
+// =========================
+// LOGIN (JWT)
+// =========================
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-router.post(
-  "/login",
-  passport.authenticate("local", {
-    failureRedirect: "/login",
-    successRedirect: "/products",
-  })
-);
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "Credenciales inválidas" });
 
-// ===== Logout =====
-router.post("/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) return res.status(500).send("Error al cerrar sesión");
-    res.redirect("/login");
-  });
+    const valid = bcrypt.compareSync(password, user.password);
+    if (!valid) return res.status(400).json({ error: "Credenciales inválidas" });
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWTSecret,
+      { expiresIn: "24h" }
+    );
+
+    res.json({ message: "Login exitoso", token });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// ===== GitHub OAuth =====
-router.get("/auth/github", passport.authenticate("github", { scope: ["user:email"] }));
-
+// =========================
+// CURRENT (JWT protected)
+// =========================
 router.get(
-  "/auth/github/callback",
-  passport.authenticate("github", { failureRedirect: "/login" }),
+  "/current",
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    // Redirigir al usuario logueado
-    res.redirect("/products");
+    res.json({
+      message: "Usuario autenticado",
+      user: req.user,
+    });
   }
 );
 
