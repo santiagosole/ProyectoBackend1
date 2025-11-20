@@ -1,8 +1,20 @@
-<h2>Usuario Actual</h2>
+<div class="container mt-5">
+  <div class="card shadow p-4">
+    <h2 class="text-center mb-4">Perfil del Usuario</h2>
 
-<p><strong>Email:</strong> {{user.email}}</p>
-<p><strong>Rol:</strong> {{user.role}}</p>
+    <ul class="list-group mb-4">
+      <li class="list-group-item"><strong>Nombre:</strong> {{user.first_name}} {{user.last_name}}</li>
+      <li class="list-group-item"><strong>Email:</strong> {{user.email}}</li>
+      <li class="list-group-item"><strong>Edad:</strong> {{user.age}}</li>
+      <li class="list-group-item"><strong>Rol:</strong> {{user.role}}</li>
+    </ul>
 
-<form action="/api/users/logout" method="POST">
-  <button type="submit">Cerrar sesión</button>
-</form>
+    <div class="d-flex justify-content-between">
+      <a href="/products" class="btn btn-primary">Ir a Productos</a>
+
+      <form action="/api/users/logout" method="POST">
+        <button class="btn btn-danger">Cerrar sesión</button>
+      </form>
+    </div>
+  </div>
+</div>
