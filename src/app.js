@@ -7,6 +7,8 @@ import handlebars from "express-handlebars";
 import path from "path";
 import mongoose from "mongoose";
 import passport from "passport";
+import productsViewsRoutes from "./routes/views/products.views.js";
+import productsRouter from "./routes/products.routes.js";
 
 // Config
 import { initPassport } from "./config/passport.config.js";
@@ -39,6 +41,8 @@ mongoose.connect(process.env.MONGO_URI)
 app.use("/users", usersViewsRoutes);
 app.use("/api/users", usersApiRoutes);
 app.use("/api/sessions", sessionsRoutes);
+app.use("/products", productsViewsRoutes);
+app.use("/products", productsRouter);
 
 app.get("/", (req, res) => {
   res.redirect("/users/login");

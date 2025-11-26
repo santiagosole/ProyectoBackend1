@@ -14,7 +14,10 @@ router.post("/register", async (req, res) => {
     const { first_name, last_name, email, password, age } = req.body;
 
     const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ error: "Usuario ya existe" });
+    if (exists)
+      return res
+        .status(400)
+        .render("auth/register", { error: "El usuario ya existe" });
 
     const hashed = bcrypt.hashSync(password, 10);
 
@@ -29,24 +32,32 @@ router.post("/register", async (req, res) => {
       role,
     });
 
-    res.status(201).json({ message: "Usuario creado", user });
+    res.status(201).render("auth/registerSuccess", {
+      message: "Usuario creado con éxito",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).render("auth/register", { error: err.message });
   }
 });
 
 // =========================
-// LOGIN (JWT)
+// LOGIN (JWT + COOKIE + REDIRECT)
 // =========================
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: "Credenciales inválidas" });
+    if (!user)
+      return res
+        .status(400)
+        .render("auth/login", { error: "Credenciales inválidas" });
 
     const valid = bcrypt.compareSync(password, user.password);
-    if (!valid) return res.status(400).json({ error: "Credenciales inválidas" });
+    if (!valid)
+      return res
+        .status(400)
+        .render("auth/login", { error: "Credenciales inválidas" });
 
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
@@ -54,14 +65,21 @@ router.post("/login", async (req, res) => {
       { expiresIn: "24h" }
     );
 
-    res.json({ message: "Login exitoso", token });
+    // Guardar token en cookie
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    // Redirige a la vista de productos
+    res.redirect("/products");
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).render("auth/login", { error: err.message });
   }
 });
 
 // =========================
-// CURRENT (JWT protected)
+// CURRENT (Protegido con Passport-JWT)
 // =========================
 router.get(
   "/current",
