@@ -10,7 +10,7 @@ const router = Router();
 // =============================
 function authCart(req, res, next) {
   try {
-    const token = req.cookies.jwt; // <--- AHORA ES "jwt", NO "authToken"
+    const token = req.cookies.jwt;
 
     if (!token) {
       console.log("❌ No hay cookie jwt");
@@ -26,7 +26,7 @@ function authCart(req, res, next) {
     next();
   } catch (err) {
     console.log("❌ Error verificando token:", err.message);
-    res.clearCookie("jwt"); // <--- idem aquí
+    res.clearCookie("jwt");
     return res.redirect("/users/login");
   }
 }
@@ -68,7 +68,12 @@ router.post("/add/:pid", authCart, async (req, res) => {
 router.get("/", authCart, async (req, res) => {
   const userId = req.userId;
 
-  const cart = await Cart.findById(userId).populate("products.productId");
+  let cart = await Cart.findById(userId).populate("products.productId");
+
+  // 🔥 SOLUCIÓN: si no existe el carrito, lo creamos vacío
+  if (!cart) {
+    cart = { products: [] };
+  }
 
   res.render("cart/cart", { cart });
 });
@@ -79,7 +84,11 @@ router.get("/", authCart, async (req, res) => {
 router.post("/clear", authCart, async (req, res) => {
   const userId = req.userId;
 
-  await Cart.findByIdAndUpdate(userId, { products: [] });
+  await Cart.findByIdAndUpdate(
+    userId,
+    { products: [] },
+    { new: true, upsert: true } // <-- asegura que exista el carrito
+  );
 
   res.redirect("/cart");
 });

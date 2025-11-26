@@ -1,25 +1,35 @@
 <h1 class="mt-4">🛒 Mi Carrito</h1>
 
-{{#if cart.products.length}}
-<div class="row mt-4">
-  {{#each cart.products}}
-  <div class="col-4">
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5>{{this.productId.title}}</h5>
-        <p>Cantidad: {{this.quantity}}</p>
-        <p>Precio: ${{this.productId.price}}</p>
-        <p>Total: ${{multiply this.quantity this.productId.price}}</p>
+{{!-- Validamos que cart exista y tenga un array products --}}
+{{#if cart}}
+  {{#if cart.products}}
+    {{#if cart.products.length}}
+
+      <div class="row mt-4">
+        {{#each cart.products}}
+          <div class="col-4">
+            <div class="card mb-4">
+              <div class="card-body">
+                <h5>{{this.productId.title}}</h5>
+                <p>Cantidad: {{this.quantity}}</p>
+                <p>Precio: ${{this.productId.price}}</p>
+                <p>Total: ${{multiply this.quantity this.productId.price}}</p>
+              </div>
+            </div>
+          </div>
+        {{/each}}
       </div>
-    </div>
-  </div>
-  {{/each}}
-</div>
 
-<form action="/cart/clear" method="POST">
-  <button class="btn btn-danger">Vaciar carrito</button>
-</form>
+      <form action="/cart/clear" method="POST">
+        <button class="btn btn-danger">Vaciar carrito</button>
+      </form>
 
+    {{else}}
+      <p>No tienes productos en el carrito.</p>
+    {{/if}}
+  {{else}}
+    <p>No tienes productos en el carrito.</p>
+  {{/if}}
 {{else}}
-<p>No tienes productos en el carrito.</p>
+  <p>No tienes productos en el carrito.</p>
 {{/if}}
