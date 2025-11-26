@@ -7,7 +7,7 @@ import User from "../models/User.js";
 const router = Router();
 
 // =========================
-// REGISTER
+// REGISTER (crea carrito vacío)
 // =========================
 router.post("/register", async (req, res) => {
   try {
@@ -20,9 +20,9 @@ router.post("/register", async (req, res) => {
         .render("auth/register", { error: "El usuario ya existe" });
 
     const hashed = bcrypt.hashSync(password, 10);
-
     const role = email === "adminCoder@coder.com" ? "admin" : "user";
 
+    // Crear usuario con carrito vacío
     const user = await User.create({
       first_name,
       last_name,
@@ -30,6 +30,7 @@ router.post("/register", async (req, res) => {
       age,
       password: hashed,
       role,
+      cart: [] // <<=== AÑADIDO
     });
 
     res.status(201).render("auth/registerSuccess", {
@@ -71,7 +72,7 @@ router.post("/login", async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    // Redirige a la vista de productos
+    // Redirige a productos
     res.redirect("/products");
   } catch (err) {
     res.status(500).render("auth/login", { error: err.message });
@@ -79,7 +80,7 @@ router.post("/login", async (req, res) => {
 });
 
 // =========================
-// CURRENT (Protegido con Passport-JWT)
+// CURRENT (JWT protegido)
 // =========================
 router.get(
   "/current",
