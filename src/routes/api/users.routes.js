@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../../models/User.model.js";
+import Cart from "../../models/Cart.js";
 
 const router = Router();
 
@@ -13,30 +14,29 @@ router.post("/register", async (req, res) => {
     const { first_name, last_name, email, age, password } = req.body;
 
     const existing = await User.findOne({ email });
-    if (existing) {
+    if (existing)
       return res.render("auth/register", {
         error: "⚠️ Ya existe un usuario con ese email."
       });
-    }
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashed = bcrypt.hashSync(password, 10);
 
-    const newUser = new User({
+    const newCart = await Cart.create({ products: [] });
+
+    const user = await User.create({
       first_name,
       last_name,
       email,
       age,
-      password: hashedPassword
+      password: hashed,
+      cart: newCart._id
     });
-
-    await newUser.save();
 
     res.render("auth/registerSuccess", {
-      first_name: newUser.first_name
+      first_name: user.first_name
     });
-
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.log(err);
     res.render("auth/register", { error: "Error en el registro." });
   }
 });
@@ -56,12 +56,12 @@ router.post("/login", async (req, res) => {
     return res.render("auth/login", { error: "Contraseña incorrecta." });
 
   const token = jwt.sign(
-    { id: user._id, email: user.email, role: user.role },
+    { id: user._id, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
 
-  res.cookie("jwt", token, { httpOnly: true, maxAge: 3600000 });
+  res.cookie("jwt", token, { httpOnly: true });
 
   return res.redirect("/users/current");
 });
@@ -71,7 +71,7 @@ router.post("/login", async (req, res) => {
 // ==========================
 router.post("/logout", (req, res) => {
   res.clearCookie("jwt");
-  return res.redirect("/users/login");
+  res.redirect("/users/login");
 });
 
 export default router;

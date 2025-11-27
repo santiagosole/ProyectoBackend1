@@ -1,4 +1,3 @@
-!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -40,15 +39,39 @@
           <li class="nav-item">
             <a class="nav-link" href="/cart">
               🛒 Carrito
+              {{#if cartCount}}
+                <span class="badge bg-success">{{cartCount}}</span>
+              {{/if}}
             </a>
           </li>
 
-          <!-- Logout -->
-          <li class="nav-item">
-            <form action="/api/users/logout" method="POST">
-              <button class="btn btn-outline-light ms-3">Salir</button>
-            </form>
-          </li>
+          <!-- Mostrar login / logout dinámico -->
+          {{#if currentUser}}
+            <!-- Perfil -->
+            <li class="nav-item">
+              <a class="nav-link" href="/users/current">
+                👤 {{currentUser.first_name}}
+              </a>
+            </li>
+
+            <!-- Logout -->
+            <li class="nav-item">
+              <form action="/api/users/logout" method="POST">
+                <button class="btn btn-outline-light ms-3">Salir</button>
+              </form>
+            </li>
+
+          {{else}}
+            <!-- Login -->
+            <li class="nav-item">
+              <a class="nav-link" href="/users/login">Ingresar</a>
+            </li>
+
+            <!-- Register -->
+            <li class="nav-item">
+              <a class="nav-link" href="/users/register">Registrarse</a>
+            </li>
+          {{/if}}
 
         </ul>
 

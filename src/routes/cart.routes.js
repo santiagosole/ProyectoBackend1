@@ -1,52 +1,41 @@
 import { Router } from "express";
-import Cart from "../models/Cart.js";
-import Product from "../models/Product.js";
 import jwt from "jsonwebtoken";
+import User from "../models/User.model.js";
+import Cart from "../models/Cart.js";
 
 const router = Router();
 
-// =============================
-// MIDDLEWARE: verificar sesión usuario
-// =============================
+// =========================
+// MIDDLEWARE: AUTH CARRITO
+// =========================
 function authCart(req, res, next) {
   try {
     const token = req.cookies.jwt;
-
-    if (!token) {
-      console.log("❌ No hay cookie jwt");
-      return res.redirect("/users/login");
-    }
+    if (!token) return res.redirect("/users/login");
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    console.log("🔐 Usuario autenticado:", decoded);
-
     req.userId = decoded.id;
 
     next();
   } catch (err) {
-    console.log("❌ Error verificando token:", err.message);
     res.clearCookie("jwt");
     return res.redirect("/users/login");
   }
 }
 
 // =========================
-// AGREGAR PRODUCTO AL CARRITO
+// AGREGAR AL CARRITO
 // =========================
 router.post("/add/:pid", authCart, async (req, res) => {
-  const userId = req.userId;
+  const user = await User.findById(req.userId);
   const productId = req.params.pid;
 
-  let cart = await Cart.findById(userId);
+  // Busca el carrito del usuario
+  let cart = await Cart.findById(user.cart);
 
-  if (!cart) {
-    console.log("🛒 Carrito no existe, creando nuevo...");
-    cart = await Cart.create({ _id: userId, products: [] });
-  }
-
+  // Busca si ese producto ya está en el carrito
   const item = cart.products.find(
-    (p) => p.productId.toString() === productId
+    p => p.productId.toString() === productId
   );
 
   if (item) {
@@ -56,9 +45,6 @@ router.post("/add/:pid", authCart, async (req, res) => {
   }
 
   await cart.save();
-
-  console.log("✔ Producto agregado al carrito");
-
   res.redirect("/products");
 });
 
@@ -66,14 +52,13 @@ router.post("/add/:pid", authCart, async (req, res) => {
 // VER CARRITO
 // =========================
 router.get("/", authCart, async (req, res) => {
-  const userId = req.userId;
+  const user = await User.findById(req.userId).populate({
+    path: "cart",
+    populate: { path: "products.productId" }
+  });
 
-  let cart = await Cart.findById(userId).populate("products.productId");
-
-  // 🔥 SOLUCIÓN: si no existe el carrito, lo creamos vacío
-  if (!cart) {
-    cart = { products: [] };
-  }
+  // ⚠️ Mongoose document -> objeto plano para Handlebars
+  const cart = user.cart.toObject();
 
   res.render("cart/cart", { cart });
 });
@@ -82,15 +67,14 @@ router.get("/", authCart, async (req, res) => {
 // VACIAR CARRITO
 // =========================
 router.post("/clear", authCart, async (req, res) => {
-  const userId = req.userId;
+  const user = await User.findById(req.userId);
 
-  await Cart.findByIdAndUpdate(
-    userId,
-    { products: [] },
-    { new: true, upsert: true } // <-- asegura que exista el carrito
-  );
+  await Cart.findByIdAndUpdate(user.cart, { products: [] });
 
   res.redirect("/cart");
 });
 
+// =========================
+// EXPORTACIÓN
+// =========================
 export default router;

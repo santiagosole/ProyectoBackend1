@@ -8,8 +8,11 @@ import path from "path";
 import mongoose from "mongoose";
 import passport from "passport";
 
-// Config
+// Configuración Passport
 import { initPassport } from "./config/passport.config.js";
+
+// Middlewares
+import { currentUser } from "./middlewares/currentUser.js";
 
 // Rutas de vistas
 import usersViewsRoutes from "./routes/views/users.views.js";
@@ -19,20 +22,29 @@ import productsViewsRoutes from "./routes/views/products.views.js";
 import usersApiRoutes from "./routes/api/users.routes.js";
 import sessionsRoutes from "./routes/api/sessions.routes.js";
 import productsRouter from "./routes/products.routes.js";
-import cartRoutes from "./routes/cart.routes.js"; // <-- agregado
+import cartRoutes from "./routes/cart.routes.js";
 
 const app = express();
 
-// Middlewares generales
+// =============================
+// MIDDLEWARES GENERALES
+// =============================
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// Passport
+// Middleware global para insertar currentUser en Handlebars
+app.use(currentUser);
+
+// =============================
+// PASSPORT
+// =============================
 initPassport();
 app.use(passport.initialize());
 
-// Handlebars
+// =============================
+// HANDLEBARS
+// =============================
 app.engine("handlebars", handlebars.engine());
 app.set("view engine", "handlebars");
 app.set("views", path.resolve("src/views"));
@@ -48,23 +60,23 @@ mongoose
 // =============================
 // RUTAS DE VISTAS
 // =============================
-app.use("/users", usersViewsRoutes);        // login/register/current
-app.use("/products", productsViewsRoutes);  // vista de productos (handlebars)
+app.use("/users", usersViewsRoutes);
+app.use("/products", productsViewsRoutes);
 
 // =============================
-// RUTAS API / FUNCIONALES
+// RUTAS API
 // =============================
 app.use("/api/users", usersApiRoutes);
 app.use("/api/sessions", sessionsRoutes);
-app.use("/api/products", productsRouter);   // API separada para productos
+app.use("/api/products", productsRouter);
 
 // =============================
-// RUTA DEL CARRITO (vistas y acciones)
+// RUTAS DEL CARRITO
 // =============================
-app.use("/cart", cartRoutes);               // <-- aquí está el carrito
+app.use("/cart", cartRoutes);
 
 // =============================
-// RUTA RAÍZ
+// RUTA PRINCIPAL
 // =============================
 app.get("/", (req, res) => {
   res.redirect("/users/login");
