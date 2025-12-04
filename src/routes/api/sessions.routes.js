@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
+import UserDTO from "../../dto/user.dto.js"; // <-- IMPORTAMOS EL DTO
 
 const router = Router();
 
@@ -8,15 +9,11 @@ router.get(
   "/current",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const safeUser = new UserDTO(req.user); // <-- LIMPIAMOS AL USUARIO
+
     res.send({
       status: "success",
-      user: {
-        id: req.user._id,
-        first_name: req.user.first_name,
-        last_name: req.user.last_name,
-        email: req.user.email,
-        role: req.user.role
-      }
+      user: safeUser
     });
   }
 );
