@@ -1,13 +1,16 @@
+// src/routes/views/products.views.js
+
 import { Router } from "express";
-import Product from "../../models/Product.js";
+import ProductsRepository from "../../repositories/products.repository.js";
 import { auth } from "../../middlewares/auth.js";
 
 const router = Router();
+const productsRepository = new ProductsRepository();
 
-// Vista de productos (protegidísima)
+// Vista de productos (protegida)
 router.get("/", auth, async (req, res) => {
   try {
-    const products = await Product.find().lean();
+    const products = await productsRepository.getAllProducts();
     res.render("products/products", { products });
   } catch (error) {
     console.error("Error cargando productos:", error);

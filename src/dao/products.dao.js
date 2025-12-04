@@ -1,12 +1,13 @@
 import ProductModel from "../models/Product.js";
 
 export default class ProductsDAO {
+
     async getAll() {
-        return await ProductModel.find();
+        return await ProductModel.find().lean();
     }
 
     async getById(id) {
-        return await ProductModel.findById(id);
+        return await ProductModel.findById(id).lean();
     }
 
     async create(data) {
@@ -14,10 +15,10 @@ export default class ProductsDAO {
     }
 
     async update(id, data) {
-        return await ProductModel.findByIdAndUpdate(id, data, { new: true });
+        return await ProductModel.findByIdAndUpdate(id, data, { new: true }).lean();
     }
 
     async delete(id) {
-        return await ProductModel.findByIdAndDelete(id);
+        return await ProductModel.findByIdAndDelete(id).lean();
     }
 }
