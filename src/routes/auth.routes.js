@@ -30,7 +30,7 @@ router.post("/register", async (req, res) => {
       age,
       password: hashed,
       role,
-      cart: [] // <<=== AÑADIDO
+      cart: [] 
     });
 
     res.status(201).render("auth/registerSuccess", {

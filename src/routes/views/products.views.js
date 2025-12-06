@@ -1,4 +1,3 @@
-// src/routes/views/products.views.js
 
 import { Router } from "express";
 import ProductsRepository from "../../repositories/products.repository.js";
