@@ -52,8 +52,15 @@ app.set("views", path.resolve("src/views"));
 // =============================
 // CONEXIÓN A MONGO
 // =============================
+const mongoUri = process.env.MONGO_URI?.trim();
+if (!mongoUri) {
+  console.error(
+    "Falta MONGO_URI en .env (URI de Atlas: Database → Connect → Drivers)."
+  );
+  process.exit(1);
+}
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(mongoUri)
   .then(() => console.log("MongoDB conectado"))
   .catch((err) => console.error("Error en conexión:", err));
 
