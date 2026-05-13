@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "config:level": "node src/scripts/config-level-cli.js"
+    "config:level": "node src/scripts/config-level-cli.js",
+    "lab:log-metrics": "node src/scripts/log-metrics-cli.js"
   },
   "keywords": [],
   "author": "",
