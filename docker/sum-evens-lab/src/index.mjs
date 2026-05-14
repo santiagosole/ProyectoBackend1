@@ -1,3 +1,7 @@
+/**
+ * Lab Docker: suma de enteros pares. Stdin línea 1 = N, línea 2 = N números separados por espacio.
+ * Probar sin imagen: node src/index.mjs < entrada.txt
+ */
 import readline from "node:readline";
 
 const rl = readline.createInterface({

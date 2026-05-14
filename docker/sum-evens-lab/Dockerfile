@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+# Build desde esta carpeta (docker build .). .dockerignore evita copiar node_modules local, logs, .git, etc.
 
 # Etapa 1: solo dependencias de producción (omit devDependencies como nodemon)
 FROM node:22-alpine AS deps

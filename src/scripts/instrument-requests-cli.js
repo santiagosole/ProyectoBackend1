@@ -1,9 +1,15 @@
+/**
+ * Lab: Pino (JSON) + prom-client. Simula /process por stdin, no levanta HTTP.
+ * Línea 1: cantidad N. Siguientes N: reqId por línea. Al final imprime métricas Prometheus.
+ * Ejecutar: npm run lab:instrument < entrada.txt  (no mezclar con el formato de lab:log-metrics)
+ */
 import readline from "node:readline";
 import pino from "pino";
 import { Registry, Counter, Histogram } from "prom-client";
 
 const logger = pino(
   { level: "info" },
+  // sync: orden estable log línea a línea antes del bloque de métricas al final
   pino.destination({ sync: true, fd: 1 })
 );
 
@@ -40,7 +46,7 @@ async function processRequest(reqId) {
   httpRequestsTotal.inc();
   httpRequestDurationSeconds.observe(durationSeconds);
 
-  logger.info({ reqId }, "Procesando peticion");
+  logger.info({ reqId }, "Procesando peticion"); 
 }
 
 const rl = readline.createInterface({

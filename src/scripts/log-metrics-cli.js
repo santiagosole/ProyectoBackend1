@@ -1,3 +1,9 @@
+/**
+ * Lab: métricas simuladas desde logs en texto.
+ * Línea 1: N. Siguientes N: RESPONSE <status> <ms> o ERROR <code> <len>.
+ * Salida: promedio de ms solo para status 200 (2 decimales) y cantidad de ERROR.
+ * Ejecutar: npm run lab:log-metrics < archivo.txt
+ */
 import readline from "node:readline";
 
 const rl = readline.createInterface({

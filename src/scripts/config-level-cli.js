@@ -1,3 +1,8 @@
+/**
+ * Lab: process.env + stdin (clase CONFIG_LEVEL).
+ * Entrada: líneas hasta EOF — "get" imprime según CONFIG_LEVEL; "set valor" actualiza process.env (sin salida).
+ * Ejecutar: npm run config:level  (stdin: teclado o redirección desde archivo)
+ */
 import readline from "node:readline";
 
 function messageForConfigLevel() {
