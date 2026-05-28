@@ -7,6 +7,8 @@ import handlebars from "express-handlebars";
 import path from "path";
 import mongoose from "mongoose";
 import passport from "passport";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUiExpress from "swagger-ui-express";
 
 // Configuración Passport
 import { initPassport } from "./config/passport.config.js";
@@ -81,6 +83,24 @@ app.use("/api/products", productsRouter);
 // RUTAS DEL CARRITO
 // =============================
 app.use("/cart", cartRoutes);
+
+// =============================
+// SWAGGER
+// =============================
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.1",
+    info: {
+      title: "Documentación de la API de Adopción",
+      version: "1.0.0",
+      description: "API para gestionar usuarios, productos y carritos en un ecommerce.",
+    },
+  },
+  apis: ["./backend-preentrega/src/docs/**/*.yaml"],
+};
+
+const specs = swaggerJsdoc(swaggerOptions);
+app.use("/api-docs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
 
 // =============================
 // RUTA PRINCIPAL
