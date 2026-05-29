@@ -16,6 +16,6 @@ const swaggerOptions = {
 
 const specs = swaggerJsdoc(swaggerOptions);
 // Guardar en la raíz de la carpeta actual (proyecto-backend1)
-const outputPath = path.resolve("..", "openapi-spec.json");
+const outputPath = path.resolve("openapi-spec.json");
 fs.writeFileSync(outputPath, JSON.stringify(specs, null, 2), "utf-8");
 console.log(`openapi-spec.json generado exitosamente en: ${outputPath}`);

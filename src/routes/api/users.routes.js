@@ -9,6 +9,31 @@ const router = Router();
 // ==========================
 // REGISTRO
 // ==========================
+/**
+ * @openapi
+ * /api/users/register:
+ *   post:
+ *     summary: Registrar un nuevo usuario en la plataforma
+ *     description: Permite registrar un usuario nuevo en el sistema con un carrito asociado.
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserRegisterInput'
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             $ref: '#/components/schemas/UserRegisterInput'
+ *     responses:
+ *       200:
+ *         description: Registro exitoso, renderiza la vista de éxito.
+ *       400:
+ *         description: Entrada inválida o email ya registrado.
+ *       500:
+ *         description: Error interno del servidor.
+ */
 router.post("/register", async (req, res) => {
   try {
     const { first_name, last_name, email, age, password } = req.body;
@@ -44,6 +69,31 @@ router.post("/register", async (req, res) => {
 // ==========================
 // LOGIN
 // ==========================
+/**
+ * @openapi
+ * /api/users/login:
+ *   post:
+ *     summary: Iniciar sesión de un usuario
+ *     description: Autentica un usuario mediante su correo electrónico y contraseña, emitiendo una cookie JWT.
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserLoginInput'
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             $ref: '#/components/schemas/UserLoginInput'
+ *     responses:
+ *       200:
+ *         description: Autenticación exitosa y redirección a la vista de usuario actual.
+ *       401:
+ *         description: Contraseña incorrecta o usuario no encontrado.
+ *       500:
+ *         description: Error interno del servidor.
+ */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -69,6 +119,18 @@ router.post("/login", async (req, res) => {
 // ==========================
 // LOGOUT
 // ==========================
+/**
+ * @openapi
+ * /api/users/logout:
+ *   post:
+ *     summary: Cerrar sesión del usuario actual
+ *     description: Limpia la cookie JWT del navegador y redirige a la vista de login.
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Cierre de sesión exitoso y redirección.
+ */
 router.post("/logout", (req, res) => {
   res.clearCookie("jwt");
   res.redirect("/users/login");
