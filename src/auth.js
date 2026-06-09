@@ -1,43 +1,42 @@
 import readline from "node:readline";
 
 export function validateToken(token) {
+  if (!token) {
+    return { valid: false, error: "Token no proporcionado" };
+  }
   try {
     const decoded = JSON.parse(Buffer.from(token, "base64").toString("utf8"));
-    if (!decoded || !decoded.role || (decoded.role !== "admin" && decoded.role !== "user")) {
-      return { valid: false, error: "Invalid token: missing or invalid role" };
+    if (!decoded || typeof decoded !== "object" || !decoded.username || !decoded.role) {
+      return { valid: false, error: "Token inválido: formato incorrecto, o le faltan propiedades username o role" };
     }
-    return { valid: true, decoded };
+    const { role, username } = decoded; // Ahora extraemos 'username'
+    if (role !== "admin" && role !== "user") {
+      return { valid: false, error: "Token inválido: rol desconocido" };
+    }
+    return { valid: true, payload: { role, username } }; // Incluimos username en el payload
   } catch (error) {
-    return { valid: false, error: error.message };
+    return { valid: false, error: "Token inválido: " + error.message };
   }
 }
 
 export function guardRoute(token, route) {
-  const PUBLIC_ROUTES = ["/login", "/register", "/home"]; // Rutas públicas de ejemplo
-
-  if (PUBLIC_ROUTES.includes(route)) {
-    return { authorized: true };
-  }
-
-  const { valid, decoded, error } = validateToken(token);
+  const { valid, payload } = validateToken(token);
 
   if (!valid) {
-    return { authorized: false, error: `Invalid token: ${error}` };
+    return false;
   }
 
-  if (decoded.role === "admin") {
-    return { authorized: true }; // Administradores tienen acceso libre
+  const { role } = payload;
+
+  if (role === "admin") {
+    return true;
   }
 
-  if (decoded.role === "user") {
-    if (route.startsWith("/user")) {
-      return { authorized: true };
-    } else {
-      return { authorized: false, error: "Unauthorized: users can only access /user routes" };
-    }
+  if (role === "user") {
+    return route.startsWith("/user");
   }
 
-  return { authorized: false, error: "Unauthorized: invalid role" }; // En cualquier otro caso, no autorizado
+  return false;
 }
 
 const rl = readline.createInterface({
@@ -53,7 +52,7 @@ for await (const line of rl) {
 const token = lines[0];
 const route = lines[1];
 
-const { authorized } = guardRoute(token, route);
+const authorized = guardRoute(token, route);
 
 if (authorized) {
   console.log("Access granted");
