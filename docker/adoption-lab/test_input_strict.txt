@@ -1,6 +1,0 @@
-5
-{"method": "GET", "url": "/adoptions"}
-{"method": "POST", "url": "/adoptions", "body": {"userId": "user999", "petId": "pet999"}}
-{"method": "POST", "url": "/adoptions", "body": {"userId": "u1", "petId": "p1"}}
-{"method": "GET", "url": "/adoptions"}
-{"method": "GET", "url": "/adoptions/1"}

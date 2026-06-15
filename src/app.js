@@ -25,6 +25,7 @@ import usersApiRoutes from "./routes/api/users.routes.js";
 import sessionsRoutes from "./routes/api/sessions.routes.js";
 import productsRouter from "./routes/products.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
+import adoptionRouter from "./routes/adoption.router.js";
 
 const app = express();
 
@@ -78,6 +79,7 @@ app.use("/products", productsViewsRoutes);
 app.use("/api/users", usersApiRoutes);
 app.use("/api/sessions", sessionsRoutes);
 app.use("/api/products", productsRouter);
+app.use("/api/adoptions", adoptionRouter);
 
 // =============================
 // RUTAS DEL CARRITO
