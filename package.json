@@ -10,7 +10,10 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "config:level": "node src/scripts/config-level-cli.js",
     "lab:log-metrics": "node src/scripts/log-metrics-cli.js",
-    "lab:instrument": "node src/scripts/instrument-requests-cli.js"
+    "lab:instrument": "node src/scripts/instrument-requests-cli.js",
+    "lab:adoptions": "cd docker/adoption-lab && npm run start",
+    "lab:adoptions:normal": "cd docker/adoption-lab && npm run start:normal",
+    "lab:adoptions:strict": "cd docker/adoption-lab && npm run start:strict"
   },
   "keywords": [],
   "author": "",

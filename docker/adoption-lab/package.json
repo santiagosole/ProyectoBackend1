@@ -1,0 +1,15 @@
+{
+  "name": "adoption-simulator",
+  "version": "1.0.0",
+  "description": "Simulador de pruebas funcionales end-to-end para adoption.router.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "start:strict": "cross-env SIMULATION_MODE=strict node index.js",
+    "start:normal": "cross-env SIMULATION_MODE=normal node index.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
