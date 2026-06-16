@@ -27,10 +27,10 @@ Contenedor ID: 8c962cbb19af8fea9eb876d291a587c6e6778c1c29aa41551b737afc35972539
 Estado: ✅ CORRIENDO EN BACKGROUND
 
 Variables de entorno cargadas:
-- MONGO_URI=mongodb+srv://santiagosolebackend:051625@cluster0.zfxx2.mongodb.net/...
-- SESSION_SECRET=mi_clave_ultrasecreta_123
-- GITHUB_CLIENT_ID=Ov23liGJKYlRbpw9qsBr
-- JWT_SECRET=unsecreto123
+- MONGO_URI=****** (configured from .env)
+- SESSION_SECRET=****** (configured from .env)
+- GITHUB_CLIENT_ID=****** (configured from .env)
+- JWT_SECRET=****** (configured from .env)
 - NODE_ENV=production
 ```
 
