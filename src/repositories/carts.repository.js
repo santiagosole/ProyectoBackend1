@@ -5,15 +5,19 @@ export default class CartsRepository {
         this.dao = new CartsDAO();
     }
 
-    async getCartById(id) {
+    async getById(id) {
         return await this.dao.getById(id);
     }
 
-    async createCart() {
+    async create() {
         return await this.dao.create();
     }
 
-    async updateCart(id, data) {
+    async update(id, data) {
         return await this.dao.update(id, data);
+    }
+
+    async addProduct(cartId, productId) {
+        return await this.dao.addProduct(cartId, productId);
     }
 }

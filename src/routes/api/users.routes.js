@@ -6,9 +6,6 @@ import Cart from "../../models/Cart.js";
 
 const router = Router();
 
-// ==========================
-// REGISTRO
-// ==========================
 /**
  * @openapi
  * /api/users/register:
@@ -41,11 +38,10 @@ router.post("/register", async (req, res) => {
     const existing = await User.findOne({ email });
     if (existing)
       return res.render("auth/register", {
-        error: "⚠️ Ya existe un usuario con ese email."
+        error: "Ya existe un usuario con ese email."
       });
 
     const hashed = bcrypt.hashSync(password, 10);
-
     const newCart = await Cart.create({ products: [] });
 
     const user = await User.create({
@@ -66,9 +62,6 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ==========================
-// LOGIN
-// ==========================
 /**
  * @openapi
  * /api/users/login:
@@ -112,13 +105,9 @@ router.post("/login", async (req, res) => {
   );
 
   res.cookie("jwt", token, { httpOnly: true });
-
   return res.redirect("/users/current");
 });
 
-// ==========================
-// LOGOUT
-// ==========================
 /**
  * @openapi
  * /api/users/logout:

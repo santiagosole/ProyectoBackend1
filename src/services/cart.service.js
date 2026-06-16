@@ -1,27 +1,24 @@
-import CartsDao from '../repositories/CartsDao.js';
-import ProductsDao from '../repositories/ProductsDao.js';
+import CartsRepository from '../repositories/carts.repository.js';
+import ProductsRepository from '../repositories/products.repository.js';
 
 class CartService {
   constructor() {
-    this.cartDao = new CartsDao();
-    this.productDao = new ProductsDao();
+    this.cartRepository = new CartsRepository();
+    this.productRepository = new ProductsRepository();
   }
 
   async getCart(cid) {
-    return await this.cartDao.getById(cid);
+    return await this.cartRepository.getById(cid);
   }
 
   async addProductToCart(cid, pid, user) {
-    // Solo user puede agregar productos
     if (user.role !== 'user') {
       throw new Error('Solo los usuarios pueden agregar productos a su carrito');
     }
 
-    const product = await this.productDao.getById(pid);
+    const product = await this.productRepository.getById(pid);
     if (!product) throw new Error('Producto no encontrado');
 
-    return await this.cartDao.addProduct(cid, pid);
+    return await this.cartRepository.addProduct(cid, pid);
   }
 }
-
-export default CartService;

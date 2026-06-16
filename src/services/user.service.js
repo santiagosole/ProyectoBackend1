@@ -1,23 +1,21 @@
-import UsersDao from '../repositories/UsersDao.js';
-import UserDTO from '../dto/UserDTO.js';
+import UsersRepository from '../repositories/users.repository.js';
+import UserDTO from '../dto/user.dto.js';
 
 class UserService {
   constructor() {
-    this.userDao = new UsersDao();
+    this.userRepository = new UsersRepository();
   }
 
   async register(userData) {
-    return await this.userDao.create(userData);
+    return await this.userRepository.create(userData);
   }
 
   async login(email) {
-    return await this.userDao.getByEmail(email);
+    return await this.userRepository.getByEmail(email);
   }
 
   async getCurrentUser(uid) {
-    const user = await this.userDao.getById(uid);
-
-    // devolvemos el DTO
+    const user = await this.userRepository.getById(uid);
     return new UserDTO(user);
   }
 }

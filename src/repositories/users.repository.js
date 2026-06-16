@@ -5,15 +5,15 @@ export default class UsersRepository {
         this.dao = new UsersDAO();
     }
 
-    async getUserById(id) {
+    async getById(id) {
         return await this.dao.getById(id);
     }
 
-    async getUserByEmail(email) {
+    async getByEmail(email) {
         return await this.dao.getByEmail(email);
     }
 
-    async createUser(data) {
+    async create(data) {
         return await this.dao.create(data);
     }
 

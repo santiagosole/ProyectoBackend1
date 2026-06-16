@@ -5,23 +5,23 @@ export default class ProductsRepository {
         this.dao = new ProductsDAO();
     }
 
-    async getAllProducts() {
+    async getAll() {
         return await this.dao.getAll();
     }
 
-    async getProductById(id) {
+    async getById(id) {
         return await this.dao.getById(id);
     }
 
-    async createProduct(data) {
+    async create(data) {
         return await this.dao.create(data);
     }
 
-    async updateProduct(id, data) {
+    async update(id, data) {
         return await this.dao.update(id, data);
     }
 
-    async deleteProduct(id) {
+    async delete(id) {
         return await this.dao.delete(id);
     }
 }

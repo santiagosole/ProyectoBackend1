@@ -12,4 +12,12 @@ export default class CartsDAO {
     async update(cartId, data) {
         return await CartModel.findByIdAndUpdate(cartId, data, { new: true });
     }
+
+    async addProduct(cartId, productId) {
+        return await CartModel.findByIdAndUpdate(
+            cartId,
+            { $push: { products: { product: productId } } },
+            { new: true }
+        );
+    }
 }
