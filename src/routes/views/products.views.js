@@ -9,7 +9,7 @@ const productsRepository = new ProductsRepository();
 // Vista de productos (protegida)
 router.get("/", auth, async (req, res) => {
   try {
-    const products = await productsRepository.getAllProducts();
+    const products = await productsRepository.getAll();
     res.render("products/products", { products });
   } catch (error) {
     console.error("Error cargando productos:", error);
