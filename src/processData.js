@@ -1,25 +1,18 @@
-// processData.js
 
-/**
- * Simula la ejecución de un proceso hijo o una transformación interna.
- * @param {string} data - La cadena de texto a procesar.
- * @returns {string} La cadena de texto procesada.
- */
+
+// Función interna que simula una transformación de datos.
 const _transformDataInternal = (data) => {
   // En un escenario real, aquí se podría invocar a un proceso hijo real
   // o realizar una operación compleja que queramos espiar/mockear.
   return `Procesado internamente: ${data}`;
 };
 
-/**
- * Procesa una cadena de texto según el modo definido en las variables de entorno.
- * @param {string} input - La cadena de texto a procesar.
- * @returns {string} La cadena de texto transformada o la original si el modo es inválido/indefinido.
- */
+// Procesa una cadena de texto, aplicando transformaciones según el modo configurado.
 export const processData = (input) => {
   const mode = process.env.PROCESS_MODE;
 
-  internal._transformDataInternal(input); // Llamada a la función interna usando el objeto exportado para que Jest pueda espiarla
+  // Ejecutamos la función interna para simular una operación, útil para pruebas.
+  internal._transformDataInternal(input);
 
   switch (mode) {
     case "UPPERCASE":

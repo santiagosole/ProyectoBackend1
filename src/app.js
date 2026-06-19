@@ -24,13 +24,13 @@ import adoptionRouter from "./routes/adoption.router.js";
 
 const app = express();
 
-// Middleware 
+// Middlewares generales
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(currentUser);
 
-// Passport 
+// Configuración de Passport para autenticación
 initPassport();
 app.use(passport.initialize());
 
@@ -39,7 +39,7 @@ app.engine("handlebars", handlebars.engine());
 app.set("view engine", "handlebars");
 app.set("views", path.resolve("src/views"));
 
-// Conexion base de datos 
+// Conexión a la base de datos MongoDB
 const mongoUri = process.env.MONGO_URI?.trim();
 if (!mongoUri) {
   console.error(
@@ -52,7 +52,7 @@ mongoose
   .then(() => console.log("MongoDB conectado"))
   .catch((err) => console.error("Error en conexión:", err));
 
-// rutas
+// Definición de rutas de la aplicación
 app.use("/users", usersViewsRoutes);
 app.use("/products", productsViewsRoutes);
 app.use("/api/users", usersApiRoutes);
@@ -61,7 +61,7 @@ app.use("/api/products", productsRouter);
 app.use("/api/adoptions", adoptionRouter);
 app.use("/cart", cartRoutes);
 
-// API documentacion
+// Configuración de la documentación de la API con Swagger
 const swaggerOptions = {
   definition: {
     openapi: "3.0.1",
@@ -77,7 +77,7 @@ const swaggerOptions = {
 const specs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
 
-// Root route
+// Redirección a la página de login al acceder a la raíz
 app.get("/", (req, res) => {
   res.redirect("/users/login");
 });

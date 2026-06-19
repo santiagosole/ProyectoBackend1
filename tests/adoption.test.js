@@ -1,9 +1,15 @@
 import express from 'express';
 import request from 'supertest';
-import { spawn } from 'child_process';
-import adoptionRouter from '../src/routes/adoption.router.js';
+import { jest } from '@jest/globals';
 
-jest.mock('child_process');
+const mockSpawn = jest.fn();
+
+jest.unstable_mockModule('child_process', () => ({
+  spawn: mockSpawn
+}));
+
+const { spawn } = await import('child_process');
+const adoptionRouter = (await import('../src/routes/adoption.router.js')).default;
 
 describe('Adoption Router', () => {
   let app;
@@ -28,19 +34,19 @@ describe('Adoption Router', () => {
       const mockChildProcess = {
         stdout: { on: jest.fn() },
         stderr: { on: jest.fn() },
-        on: jest.fn((event, callback) => {
-          if (event === 'close') {
-            setTimeout(() => {
-              callback.mockChildProcess.stdout.on.mock.calls[0][1](
-                JSON.stringify({ valid: true, status: 'approved' })
-              );
-              callback(0);
-            }, 10);
-          }
-        })
+        on: jest.fn()
       };
 
-      spawn.mockReturnValue(mockChildProcess);
+      mockSpawn.mockReturnValue(mockChildProcess);
+
+      mockChildProcess.on.mockImplementation((event, callback) => {
+        if (event === 'close') {
+          mockChildProcess.stdout.on.mock.calls[0][1](
+            JSON.stringify({ valid: true, status: 'approved' })
+          );
+          callback(0);
+        }
+      });
 
       await request(app)
         .post('/adoptions')
@@ -63,7 +69,7 @@ describe('Adoption Router', () => {
         on: jest.fn()
       };
 
-      spawn.mockReturnValue(mockChildProcess);
+      mockSpawn.mockReturnValue(mockChildProcess);
 
       // Simular respuesta exitosa del worker
       mockChildProcess.on.mockImplementation((event, callback) => {
@@ -114,7 +120,7 @@ describe('Adoption Router', () => {
         on: jest.fn()
       };
 
-      spawn.mockReturnValue(mockChildProcess);
+      mockSpawn.mockReturnValue(mockChildProcess);
 
       mockChildProcess.on.mockImplementation((event, callback) => {
         if (event === 'close') {
@@ -142,7 +148,7 @@ describe('Adoption Router', () => {
         on: jest.fn()
       };
 
-      spawn.mockReturnValue(mockChildProcess);
+      mockSpawn.mockReturnValue(mockChildProcess);
 
       mockChildProcess.on.mockImplementation((event, callback) => {
         if (event === 'close') {
@@ -167,7 +173,7 @@ describe('Adoption Router', () => {
         on: jest.fn()
       };
 
-      spawn.mockReturnValue(mockChildProcess);
+      mockSpawn.mockReturnValue(mockChildProcess);
 
       mockChildProcess.on.mockImplementation((event, callback) => {
         if (event === 'close') {

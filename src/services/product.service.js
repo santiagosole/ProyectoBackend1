@@ -1,6 +1,6 @@
 import ProductsRepository from '../repositories/products.repository.js';
 
-class ProductService {
+export default class ProductService {
   constructor() {
     this.productRepository = new ProductsRepository();
   }

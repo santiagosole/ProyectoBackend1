@@ -12,7 +12,7 @@ let idCounter = 1;
  */
 function validateAdoption(userId, petId) {
   return new Promise((resolve) => {
-    const child = spawn('node', ["./src/scripts/validationWorker.js", userId, petId], {
+    const child = spawn('node', ["./backend-preentrega/src/scripts/validationWorker.js", userId, petId], {
       env: { ...process.env }
     });
 

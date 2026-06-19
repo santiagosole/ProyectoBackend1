@@ -1,7 +1,7 @@
 import UsersRepository from '../repositories/users.repository.js';
 import UserDTO from '../dto/user.dto.js';
 
-class UserService {
+export default class UserService {
   constructor() {
     this.userRepository = new UsersRepository();
   }
