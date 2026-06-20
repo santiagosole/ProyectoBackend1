@@ -6,13 +6,15 @@
         <div class="col-md-4 mb-4">
             <div class="card shadow-sm">
 
+                {{!-- Usar una imagen de Unsplash con un placeholder si no hay imagen específica --}}
+                <img src="https://picsum.photos/seed/{{this._id}}/400/200" class="card-img-top product-img" alt="{{title}}">
                 <div class="card-body">
                     <h5 class="card-title">{{title}}</h5>
                     <p class="card-text">{{description}}</p>
 
-                    <p class="fw-bold">${{price}}</p>
+                    <p class="fw-bold price-text">${{price}}</p>
                     <form action="/cart/add/{{this._id}}" method="POST">
-                        <button class="btn btn-primary mt-2">Comprar</button>
+                        <button type="submit" class="btn btn-primary mt-2 btn-add-to-cart">Agregar al carrito</button>
                     </form>
                 </div>
 

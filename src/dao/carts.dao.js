@@ -2,7 +2,7 @@ import CartModel from "../models/Cart.js";
 
 export default class CartsDAO {
     async getById(id) {
-        return await CartModel.findById(id).populate("products.product");
+        return await CartModel.findById(id).populate("products.productId");
     }
 
     async create() {

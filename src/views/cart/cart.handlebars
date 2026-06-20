@@ -1,20 +1,93 @@
-<h1>Mi Carrito</h1>
+<h1 class="text-center mt-4">Tu Carrito de Compras</h1>
 
 {{#if cart.products.length}}
-  <ul class="list-group">
-    {{#each cart.products}}
-      <li class="list-group-item d-flex justify-content-between">
-        <span>
-          {{this.productId.title}} — ${{this.productId.price}}
-        </span>
-        <strong>x {{this.quantity}}</strong>
-      </li>
-    {{/each}}
-  </ul>
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <ul class="list-group mb-4">
+          {{#each cart.products}}
+            <li class="list-group-item d-flex justify-content-between align-items-center shadow-sm mb-3">
+              <div class="d-flex align-items-center">
+                <img src="https://picsum.photos/seed/{{this.productId._id}}/80/80" class="cart-item-img me-3 rounded" alt="{{this.productId.title}}">
+                <div>
+                  <h5 class="my-0">{{this.productId.title}}</h5>
+                  <small class="text-muted">{{this.productId.description}}</small>
+                </div>
+              </div>
+              <div class="d-flex align-items-center">
+                <button class="btn btn-sm btn-outline-danger me-2" onclick="updateQuantity('{{this.productId._id}}', {{this.quantity}}, -1)">-</button>
+                <span class="fw-bold mx-2">{{this.quantity}}</span>
+                <button class="btn btn-sm btn-outline-success ms-2" onclick="updateQuantity('{{this.productId._id}}', {{this.quantity}}, 1)">+</button>
+              </div>
+              <strong class="ms-auto">${{multiply this.productId.price this.quantity}}</strong>
+              <button class="btn btn-danger btn-sm ms-3" onclick="removeItem('{{this.productId._id}}')">Eliminar</button>
+            </li>
+          {{/each}}
+        </ul>
 
-  <form action="/cart/clear" method="POST" class="mt-3">
-    <button class="btn btn-danger">Vaciar carrito</button>
-  </form>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="cart-total">Total: ${{calculateCartTotal cart.products}}</h4>
+          <div>
+            <form action="/cart/clear" method="POST" class="d-inline-block me-2">
+              <button type="submit" class="btn btn-warning">Vaciar Carrito</button>
+            </form>
+            <a href="/products" class="btn btn-secondary me-2">Seguir Comprando</a>
+            <form action="/cart/purchase" method="POST" class="d-inline-block">
+              <button type="submit" class="btn btn-success">Finalizar Compra</button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 {{else}}
-  <p>No tienes productos en el carrito.</p>
+  <div class="empty-cart-message">
+    <p>¡Tu carrito está vacío!</p>
+    <p class="text-muted">Parece que aún no has agregado ningún producto.</p>
+    <a href="/products" class="btn btn-primary">Explorar productos</a>
+  </div>
 {{/if}}
+
+<script>
+  // Función auxiliar Handlebars para multiplicar y calcular el total del carrito
+  Handlebars.registerHelper('multiply', function(price, quantity) {
+    return (price * quantity).toFixed(2);
+  });
+
+  Handlebars.registerHelper('calculateCartTotal', function(products) {
+    let total = 0;
+    products.forEach(item => {
+      total += item.productId.price * item.quantity;
+    });
+    return total.toFixed(2);
+  });
+</script>
+
+<script>
+  function updateQuantity(productId, currentQuantity, change) {
+    const newQuantity = currentQuantity + change;
+    if (newQuantity < 0) return; // No permitir cantidades negativas
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `/cart/update/${productId}`;
+
+    const quantityInput = document.createElement("input");
+    quantityInput.type = "hidden";
+    quantityInput.name = "quantity";
+    quantityInput.value = newQuantity;
+    form.appendChild(quantityInput);
+
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  function removeItem(productId) {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `/cart/remove/${productId}`;
+    document.body.appendChild(form);
+    form.submit();
+  }
+</script>

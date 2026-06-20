@@ -1,0 +1,45 @@
+<h1 class="text-center mt-4">¡Compra Exitosa!</h1>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+          <h4 class="mb-0">Resumen de tu Pedido</h4>
+        </div>
+        <div class="card-body">
+          <p class="card-text text-center lead mb-4">¡Gracias por tu compra!</p>
+          <p class="card-text text-center">Tu pedido **NÚMERO #{{purchaseCode}}** ha sido procesado con éxito.</p>
+          <p class="card-text text-center">Recibirás un correo electrónico con todas las instrucciones para el pago y detalles de envío.</p>
+
+          <ul class="list-group list-group-flush mb-3 mt-4">
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+              <strong>Total Final:</strong>
+              <span class="h5 text-success">${{totalAmount}}</span>
+            </li>
+          </ul>
+
+          <h5 class="mt-4 mb-3 text-center">Productos Comprados:</h5>
+          <ul class="list-group">
+            {{#each products}}
+              <li class="list-group-item d-flex justify-content-between align-items-center shadow-sm mb-2">
+                <div class="d-flex align-items-center">
+                  <img src="https://picsum.photos/seed/{{this.productId._id}}/70/70" class="img-thumbnail me-3 rounded" alt="{{this.productId.title}}">
+                  <div>
+                    <h6 class="my-0">{{this.productId.title}}</h6>
+                    <small class="text-muted">Cantidad: {{this.quantity}}</small>
+                  </div>
+                </div>
+                <span class="fw-bold">${{multiply this.productId.price this.quantity}}</span>
+              </li>
+            {{/each}}
+          </ul>
+
+          <div class="text-center mt-4">
+            <a href="/products" class="btn btn-primary">Volver a la tienda</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
