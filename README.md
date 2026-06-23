@@ -137,7 +137,7 @@ Este comando levantará el entorno de pruebas, ejecutará los assertions y te da
 A continuación, se adjuntan los accesos al contenedor distribuido y la evidencia del funcionamiento local:
 
 ### Imagen Oficial en DockerHub
-👉 **[santiagosole93/adoption-api](https://docker.com)
+[santiagosole93/adoption-api](https://docker.com)
 ### Capturas de Pantalla y Evidencias de Ejecución
 
 #### 1. Construcción Exitosa de la Imagen (Docker Build)
