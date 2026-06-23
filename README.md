@@ -137,12 +137,12 @@ Este comando levantará el entorno de pruebas, ejecutará los assertions y te da
 A continuación, se adjuntan los accesos al contenedor distribuido y la evidencia del funcionamiento local:
 
 ### Imagen Oficial en DockerHub
-👉 **[INSERTAR_AQUÍ_LA_URL_DE_TU_REPOSITORIO_DE_DOCKERHUB]**
-
+👉 **[santiagosole93/adoption-api](https://docker.com)
 ### Capturas de Pantalla y Evidencias de Ejecución
 
 #### 1. Construcción Exitosa de la Imagen (Docker Build)
-`[Pegar aquí la captura de pantalla o los logs que demuestren la correcta compilación de la imagen]`
+<img width="1535" height="52" alt="Captura de pantalla 2026-06-22 213806" src="https://github.com/user-attachments/assets/1463f7fa-91d4-4356-8213-d4efbb1cb0d1" />
 
 #### 2. Inicio Exitoso del Contenedor y Conexión a Base de Datos (Docker Run & Logs)
-`[Pegar aquí la captura de pantalla de la terminal mostrando la salida de "docker logs adoption-container" donde se vea el servidor escuchando y la conexión establecida a MongoDB]`
+<img width="1102" height="142" alt="Captura de pantalla 2026-06-22 214253" src="https://github.com/user-attachments/assets/f0ee81e2-2a25-414c-8cb1-0858d7649ebb" />
+
