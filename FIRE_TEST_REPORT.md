@@ -27,10 +27,10 @@ Contenedor ID: 8c962cbb19af8fea9eb876d291a587c6e6778c1c29aa41551b737afc35972539
 Estado: ✅ CORRIENDO EN BACKGROUND
 
 Variables de entorno cargadas:
-- MONGO_URI=****** (configured from .env)
-- SESSION_SECRET=****** (configured from .env)
-- GITHUB_CLIENT_ID=****** (configured from .env)
-- JWT_SECRET=****** (configured from .env)
+- MONGO_URI=****** (configurada desde .env)
+- SESSION_SECRET=****** (configurada desde .env)
+- GITHUB_CLIENT_ID=****** (configurada desde .env)
+- JWT_SECRET=****** (configurada desde .env)
 - NODE_ENV=production
 ```
 

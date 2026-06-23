@@ -26,7 +26,7 @@ import adoptionRouter from "./routes/adoption.router.js";
 
 const app = express();
 
-// Middlewares generales
+// Middlewares globales de Express
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -48,8 +48,8 @@ app.engine("handlebars", engine({
       return total.toFixed(2);
     }
   },
-  // Configuración para permitir el acceso a propiedades de prototipos y métodos
-  // Esto es necesario porque Mongoose devuelve objetos que no son "own properties"
+// Configuración para que Handlebars pueda acceder a las propiedades y métodos de los objetos de Mongoose.
+// Esto es útil porque Mongoose devuelve objetos que necesitan ser serializados para su uso en plantillas.
   runtimeOptions: {
     allowProtoPropertiesByDefault: true,
     allowProtoMethodsByDefault: true,
@@ -58,20 +58,21 @@ app.engine("handlebars", engine({
 app.set("view engine", "handlebars");
 app.set("views", path.resolve("src/views"));
 
-// Conexión a la base de datos MongoDB
+// Establece la conexión con la base de datos MongoDB.
+// Si la URI de conexión no está presente en las variables de entorno, muestra un error y sale del proceso.
 const mongoUri = process.env.MONGO_URI?.trim();
 if (!mongoUri) {
   console.error(
-    "Falta MONGO_URI en .env (URI de Atlas: Database → Connect → Drivers)."
+    "Falta MONGO_URI en .env (asegúrate de especificar la URI de tu base de datos Atlas)."
   );
   process.exit(1);
 }
 mongoose
   .connect(mongoUri)
-  .then(() => console.log("MongoDB conectado"))
-  .catch((err) => console.error("Error en conexión:", err));
+  .then(() => console.log("Conexión exitosa a MongoDB."))
+  .catch((err) => console.error("Error al conectar con MongoDB:", err));
 
-// Definición de rutas de la aplicación
+// Define las rutas de la aplicación para organizar los diferentes endpoints.
 app.use("/users", usersViewsRoutes);
 app.use("/products", productsViewsRoutes);
 app.use("/api/users", usersApiRoutes);
@@ -79,9 +80,9 @@ app.use("/api/sessions", sessionsRoutes);
 app.use("/api/products", productsRouter);
 app.use("/api/adoptions", adoptionRouter);
 app.use("/cart", cartRoutes);
-app.use("/api/purchase", purchaseRoutes); // Usa la nueva ruta de compra
+app.use("/api/purchase", purchaseRoutes); // Ruta para gestionar las compras
 
-// Configuración de la documentación de la API con Swagger
+// Configura Swagger para generar y servir la documentación de la API.
 const swaggerOptions = {
   definition: {
     openapi: "3.0.1",
@@ -97,7 +98,7 @@ const swaggerOptions = {
 const specs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
 
-// Redirección a la página de login al acceder a la raíz
+// Redirige al usuario a la página de inicio de sesión cuando accede a la ruta raíz.
 app.get("/", (req, res) => {
   res.redirect("/users/login");
 });

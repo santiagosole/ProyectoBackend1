@@ -1,4 +1,3 @@
-# Stage 1: Build
 FROM node:23-alpine AS builder
 
 WORKDIR /app
@@ -7,7 +6,7 @@ COPY package*.json ./
 
 RUN npm ci --only=production
 
-# Stage 2: Runtime
+
 FROM node:23-alpine
 
 ENV NODE_ENV=production

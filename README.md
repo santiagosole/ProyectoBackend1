@@ -1,148 +1,148 @@
-# Documentación del Proyecto: backend-preentrega
+# Adoptme - API de Gestión de Adopciones y Ecommerce
 
-## 1. Árbol de Directorios
-```
+Este proyecto es una plataforma completa de backend para un sistema de adopciones y comercio electrónico, desarrollada sobre **Node.js**, **Express** y **MongoDB**. Implementa una arquitectura profesional en capas (Routing, Controllers, Services, Repositories, DAO y DTO), sistema de autenticación seguro, documentación automatizada con Swagger y contenedores optimizados con Docker.
+
+---
+
+## 📌 Estructura del Proyecto
+
+A continuación se detalla el árbol de directorios simplificado de la aplicación con los archivos clave:
+
+```text
 backend-preentrega/
-├── Dockerfile
-├── .dockerignore
-├── .env
-├── .env.local
-├── .env.*.local
-├── entrada.txt
-├── entrada-instrument.txt
-├── package.json
-├── package-lock.json
-├── README.md
-├── src/
-│   ├── app.js
-│   ├── auth.js
-│   ├── config/
+├── docker/                 # Configuraciones adicionales de contenedores
+├── public/                 # Recursos estáticos (estilos, imágenes subidas)
+├── src/                    # Código fuente principal de la aplicación
+│   ├── config/             # Configuración de base de datos y estrategias de Passport
 │   │   ├── db.js
 │   │   └── passport.config.js
-│   ├── controllers/
+│   ├── controllers/        # Controladores que manejan la lógica de las peticiones
 │   │   ├── cart.controller.js
 │   │   ├── product.controller.js
-│   │   ├── user.controller.js
-│   │   └── reset.routes.js
-│   ├── dao/
+│   │   └── user.controller.js
+│   ├── dao/                # Data Access Objects para interactuar con la base de datos
 │   │   ├── carts.dao.js
 │   │   ├── products.dao.js
 │   │   └── users.dao.js
-│   ├── dto/
-│   │   └── user.dto.js
-│   ├── models/
+│   ├── docs/               # Archivos de definición y documentación para Swagger YAML
+│   ├── dto/                # Data Transfer Objects para filtrado de datos expuestos
+│   ├── middlewares/        # Middlewares de control de acceso, autenticación y sesión
+│   ├── models/             # Esquemas y modelos de datos de Mongoose
 │   │   ├── Cart.js
 │   │   ├── Product.js
+│   │   ├── Ticket.js
 │   │   └── User.model.js
-│   ├── middlewares/
-│   │   ├── authorization.js
-│   │   ├── auth.js
-│   │   ├── currentUser.js
-│   │   └── passport.config.js
-│   ├── routes/
-│   │   ├── adoption.router.js
-│   │   ├── auth.routes.js
-│   │   ├── cart.routes.js
-│   │   ├── purchase.routes.js
-│   │   ├── products.routes.js
-│   │   └── sessions.routes.js
-│   ├── services/
-│   │   ├── mailing.service.js
-│   │   └── purchase.service.js
-│   ├── scripts/
-│   │   ├── config-level-cli.js
-│   │   ├── generate-swagger.js
-│   │   ├── instrument-requests-cli.js
-│   │   └── log-metrics-cli.js
-│   ├── views/
-│   │   ├── auth/
-│   │   │   ├── login.handlebars
-│   │   │   ├── register.handlebars
-│   │   │   └── registerSuccess.handlebars
-│   │   ├── cart/
-│   │   │   └── cart.handlebars
-│   │   ├── purchase/
-│   │   │   └── summary.handlebars
-│   │   ├── products/
-│   │   │   └── products.handlebars
-│   │   ├── reset/
-│   │   │   ├── requestReset.handlebars
-│   │   │   └── resetPassword.handlebars
-│   │   └── users/
-│   │       └── current.handlebars
-│   └── views/
-│       └── layouts/
-│           └── main.handlebars
-├── tests/
-│   └── adoption.test.js
-├── public/
-│   └── css/
-│       └── style.css
-└── uploads/
+│   ├── repositories/       # Capa de abstracción sobre el acceso a datos (Patrón Repository)
+│   ├── routes/             # Enrutadores divididos en vistas de frontend (Handlebars) y API REST
+│   │   ├── api/            # Endpoints REST (sessions, users, adoptions, etc.)
+│   │   └── views/          # Rutas que renderizan interfaces web
+│   ├── scripts/            # Scripts de automatización y herramientas de línea de comandos
+│   ├── services/           # Capa de negocio (lógica de compras, mailing, etc.)
+│   ├── views/              # Plantillas Handlebars para la interfaz de usuario
+│   ├── app.js              # Inicialización de Express, middlewares globales y base de datos
+│   └── server.js           # Punto de entrada de la aplicación para iniciar el servidor
+├── tests/                  # Suite de pruebas unitarias y de integración (Jest / Supertest)
+├── Dockerfile              # Archivo de definición para la construcción de la imagen de producción
+├── package.json            # Configuración de dependencias y scripts de ejecución
+└── README.md               # Documentación general del proyecto
 ```
 
-## 2. Arquitectura del Proyecto
-### Componentes Principales
-- **Modelos**: Definiciones de datos (User, Product, Cart) usando Mongoose.
-- **Controladores**: Lógica de negocio para endpoints (product.controller.js, user.controller.js).
-- **Servicios**: Lógica de negocio encapsulada (product.service.js, purchase.service.js).
-- **Repositorios**: Acceso a datos (products.repository.js, carts.repository.js).
-- **Rutas**: Definición de endpoints (adoption.router.js, auth.routes.js).
-- **Middlewares**: Autenticación y autorización (auth.js, authorization.js).
-- **Vistas**: Plantillas Handlebars para interfaces (products/products.handlebars).
+---
 
-### Flujo de Trabajo
-1. **Autenticación**: Usuarios se autentican mediante JWT o OAuth2.
-2. **Gestión de Carrito**: Usuarios pueden agregar/eliminar productos al carrito.
-3. **Procesamiento de Adopciones**: Lógica para crear y gestionar adopciones.
-4. **Integración con Docker**: Contenedor para despliegue en producción.
+## 🏛️ Arquitectura y Propósito de las Carpetas
 
-## 3. Instrucciones de Docker
-### Construcción
+La aplicación está organizada bajo principios de diseño escalables y separación de responsabilidades:
+
+- **`src/config/`**: Centraliza la inicialización de recursos clave, como la conexión de la base de datos de MongoDB Atlas y la seguridad mediante Passport.
+- **`src/controllers/`**: Se encargan exclusivamente de recibir las peticiones HTTP (req) de los clientes, procesar los parámetros básicos y estructurar las respuestas (res) que se enviarán de vuelta.
+- **`src/services/`**: Contienen toda la lógica de negocio del sistema (por ejemplo, validaciones avanzadas, envío de correos o procesamiento de carritos de compras). No interactúan directamente con la base de datos.
+- **`src/repositories/`**: Actúan como un puente entre la lógica de negocio y la capa de persistencia (DAO), formateando y mapeando los datos que entran y salen.
+- **`src/dao/` (Data Access Objects)**: Contienen las operaciones directas de lectura y escritura en la base de datos. Si se requiere cambiar de base de datos (por ejemplo, a PostgreSQL), solo se modificaría esta capa.
+- **`src/dto/` (Data Transfer Objects)**: Limpian y estructuran la información que viaja hacia afuera para evitar exponer datos sensibles de la base de datos (como contraseñas).
+- **`src/routes/`**: Define los puntos de acceso de la aplicación, separando las interfaces gráficas (`views`) de la lógica del servicio web (`api`).
+- **`src/models/`**: Define la estructura formal de los documentos de MongoDB mediante esquemas estructurados de Mongoose.
+
+---
+
+## 🐳 Instrucciones de Docker
+
+El proyecto está preparado para ejecutarse dentro de un entorno aislado utilizando contenedores de Docker. Se utiliza una construcción optimizada en múltiples etapas (multi-stage build) para mantener la imagen final ligera y segura.
+
+### 1. Construir la Imagen de Docker
+
+Asegúrate de estar en el directorio raíz donde se encuentra el archivo `Dockerfile`. Ejecuta el siguiente comando para compilar la imagen:
+
 ```bash
-docker build -t backend-preentrega .
+docker build -t adoption-api:1.0 .
 ```
 
-### Ejecución
+*Nota: Esto instalará solo las dependencias de producción y creará una imagen limpia basada en Alpine Linux.*
+
+### 2. Ejecutar el Contenedor con Variables de Entorno
+
+Una vez compilada la imagen, puedes levantar el contenedor pasando las variables de entorno definidas en tu archivo `.env`. Ejecuta el siguiente comando:
+
 ```bash
-docker run -p 8080:8080 -e MONGO_URI="mongodb://localhost:27017/preentrega" -e JWT_SECRET="your_secret_key" backend-preentrega
+docker run -d --name adoption-container -p 8081:8080 --env-file .env adoption-api:1.0
 ```
 
-### Variables de Entorno
-- `MONGO_URI`: URI de conexión a MongoDB.
-- `JWT_SECRET`: Clave secreta para JWT.
+Este comando:
+- Ejecuta el contenedor en segundo plano (`-d`).
+- Le asigna el nombre `adoption-container`.
+- Mapea el puerto local `8081` al puerto interno del contenedor `8080` (`-p 8081:8080`).
+- Carga las credenciales y configuraciones directamente desde el archivo `.env` (`--env-file .env`).
 
-## 4. Pruebas
-### Ejecutar Pruebas
+### 3. Verificar el Funcionamiento
+
+Puedes verificar que el contenedor se está ejecutando correctamente con:
+
+```bash
+docker ps
+```
+
+Y revisar los registros de arranque del servidor utilizando:
+
+```bash
+docker logs adoption-container
+```
+
+---
+
+## 🧪 Ejecutar la Suite de Pruebas (Tests)
+
+La aplicación cuenta con pruebas automatizadas integradas para validar la robustez del código.
+
+### Requisitos Previos
+
+Asegúrate de tener instaladas las dependencias de desarrollo localmente:
+
+```bash
+npm install
+```
+
+### Ejecutar los Tests de Integración
+
+Para correr las pruebas implementadas (por ejemplo, usando Mocha/Chai o Jest), ejecuta el siguiente comando en la consola:
+
 ```bash
 npm test
 ```
 
-### Cobertura
-```bash
-npm test -- --coverage
-```
+Este comando levantará el entorno de pruebas, ejecutará los assertions y te dará un reporte en consola detallando el estado de cada test.
 
-## 5. Placeholders
-- **URL de DockerHub**: `https://hub.docker.com/r/usuario/repo`
-- **Capturas de Logs**: `BUILD_LOGS.txt`, `FIRE_TEST_REPORT.md`
+---
 
-## 6. Instrucciones de Ejecución
-1. **Iniciar el servidor**:
-   ```bash
-   npm start
-   ```
-2. **Ejecutar pruebas**:
-   ```bash
-   npm test
-   ```
-3. **Ejecutar Docker**:
-   ```bash
-   docker build -t backend-preentrega .
-   docker run -p 8080:8080 backend-preentrega
-   ```
+## 🚀 Repositorio de DockerHub & Logs de Ejecución
 
-## 7. Notas Adicionales
-- **Dependencias**: Requiere Node.js v18+ y MongoDB.
-- **Configuración**: Variables de entorno en `.env` o `.env.local`.
-- **Documentación**: Swagger generada con `npm run config:level`.
+A continuación, se adjuntan los accesos al contenedor distribuido y la evidencia del funcionamiento local:
+
+### Imagen Oficial en DockerHub
+👉 **[INSERTAR_AQUÍ_LA_URL_DE_TU_REPOSITORIO_DE_DOCKERHUB]**
+
+### Capturas de Pantalla y Evidencias de Ejecución
+
+#### 1. Construcción Exitosa de la Imagen (Docker Build)
+`[Pegar aquí la captura de pantalla o los logs que demuestren la correcta compilación de la imagen]`
+
+#### 2. Inicio Exitoso del Contenedor y Conexión a Base de Datos (Docker Run & Logs)
+`[Pegar aquí la captura de pantalla de la terminal mostrando la salida de "docker logs adoption-container" donde se vea el servidor escuchando y la conexión establecida a MongoDB]`
