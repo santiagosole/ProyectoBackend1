@@ -1,11 +1,11 @@
-/**
 import { env } from "../config/env.js";
- * Lab: process.env + stdin (clase CONFIG_LEVEL).
- * Entrada: líneas hasta EOF — "get" imprime según CONFIG_LEVEL; "set valor" actualiza process.env (sin salida).
- * Ejecutar: npm run config:level  (stdin: teclado o redirección desde archivo)
- */
 import readline from "node:readline";
 
+/**
+ * Lab: process.env + stdin (clase CONFIG_LEVEL).
+ * Entrada: líneas hasta EOF — "get" imprime según CONFIG_LEVEL; "set valor" actualiza env.configLevel (sin salida).
+ * Ejecutar: npm run config:level  (stdin: teclado o redirección desde archivo)
+ */
 function messageForConfigLevel() {
   const level = env.configLevel;
   if (level === "high") return "Configuración alta activada";
