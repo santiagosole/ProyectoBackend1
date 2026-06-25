@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import User from "../models/User.model.js";
+import { env } from "./env.js";
 
 export function initPassport() {
 
@@ -9,7 +10,7 @@ export function initPassport() {
     new JwtStrategy(
       {
         jwtFromRequest: ExtractJwt.fromExtractors([(req) => req?.cookies?.jwt]),
-        secretOrKey: process.env.JWT_SECRET
+        secretOrKey: env.jwtSecret
       },
       async (jwtPayload, done) => {
         try {

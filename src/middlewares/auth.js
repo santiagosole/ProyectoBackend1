@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.model.js";
+import { env } from "../config/env.js";
 
 export const auth = async (req, res, next) => {
   try {
@@ -9,7 +10,7 @@ export const auth = async (req, res, next) => {
       return res.redirect("/users/login?error=Debes iniciar sesión");
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, env.jwtSecret);
 
     const user = await User.findById(decoded.id).lean();
     if (!user) {

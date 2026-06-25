@@ -1,6 +1,7 @@
+import { env } from "../config/env.js";
 const userId = process.argv[2];
 const petId = process.argv[3];
-const mode = (process.env.SIMULATION_MODE || 'normal').trim();
+const mode = (env.simulationMode || 'normal').trim();
 
 // Usuarios y mascotas simulados como válidos en el sistema
 const validUsers = ['u1', 'u2', 'u3', 'user123', 'user456'];

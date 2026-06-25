@@ -2,6 +2,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User.model.js";
 import Cart from "../models/Cart.js";
+import { env } from "../config/env.js";
 
 const router = Router();
 
@@ -10,7 +11,7 @@ function authCart(req, res, next) {
     const token = req.cookies.jwt;
     if (!token) return res.redirect("/users/login");
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, env.jwtSecret);
     req.userId = decoded.id;
     next();
   } catch (err) {

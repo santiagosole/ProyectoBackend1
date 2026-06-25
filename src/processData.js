@@ -8,8 +8,9 @@ const _transformDataInternal = (data) => {
 };
 
 // Procesa una cadena de texto, aplicando transformaciones según el modo configurado.
+import { env } from "./config/env.js";
 export const processData = (input) => {
-  const mode = process.env.PROCESS_MODE;
+  const mode = env.processMode;
 
   // Ejecutamos la función interna para simular una operación, útil para pruebas.
   internal._transformDataInternal(input);

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { spawn } from 'child_process';
+import { env } from '../config/env.js';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ let idCounter = 1;
 function validateAdoption(userId, petId) {
   return new Promise((resolve) => {
     const child = spawn('node', ["./backend-preentrega/src/scripts/validationWorker.js", userId, petId], {
-      env: { ...process.env }
+      env: { ...process.env, ...env }
     });
 
     let stdoutData = '';

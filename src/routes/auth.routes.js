@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 import User from "../models/User.model.js";
+import { env } from "../config/env.js";
 
 const router = Router();
 
@@ -55,8 +56,8 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
-      process.env.JWTSecret,
-      { expiresIn: "24h" }
+      env.jwtSecret,
+      { expiresIn: env.jwtExpiresIn }
     );
 
     res.cookie("authToken", token, {

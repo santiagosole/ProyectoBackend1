@@ -1,7 +1,5 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
+import { env } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import handlebars from "express-handlebars";
 import { engine } from "express-handlebars";
@@ -60,15 +58,8 @@ app.set("views", path.resolve("src/views"));
 
 // Establece la conexión con la base de datos MongoDB.
 // Si la URI de conexión no está presente en las variables de entorno, muestra un error y sale del proceso.
-const mongoUri = process.env.MONGO_URI?.trim();
-if (!mongoUri) {
-  console.error(
-    "Falta MONGO_URI en .env (asegúrate de especificar la URI de tu base de datos Atlas)."
-  );
-  process.exit(1);
-}
 mongoose
-  .connect(mongoUri)
+  .connect(env.mongoUri)
   .then(() => console.log("Conexión exitosa a MongoDB."))
   .catch((err) => console.error("Error al conectar con MongoDB:", err));
 

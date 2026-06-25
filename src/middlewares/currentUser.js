@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { env } from "../config/env.js";
 
 export function currentUser(req, res, next) {
   try {
@@ -9,7 +10,7 @@ export function currentUser(req, res, next) {
       return next();
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, env.jwtSecret);
 
     res.locals.currentUser = {
       id: decoded.id,
