@@ -83,7 +83,7 @@ const swaggerOptions = {
       description: "API para gestionar usuarios, productos y carritos en un ecommerce.",
     },
   },
-  apis: ["./backend-preentrega/src/docs/**/*.yaml"],
+  apis: ["./src/docs/**/*.yaml"],
 };
 
 const specs = swaggerJsdoc(swaggerOptions);
