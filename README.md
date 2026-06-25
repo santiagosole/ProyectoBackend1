@@ -13,25 +13,16 @@ backend-preentrega/
 ├── docker/                 # Configuraciones adicionales de contenedores
 ├── public/                 # Recursos estáticos (estilos, imágenes subidas)
 ├── src/                    # Código fuente principal de la aplicación
-│   ├── config/             # Configuración de base de datos y estrategias de Passport
+│   ├── config/             # Configuración de base de datos, env.js y estrategias de Passport
+│   │   ├── env.js          # Centraliza todas las variables de entorno con valores por defecto
 │   │   ├── db.js
 │   │   └── passport.config.js
 │   ├── controllers/        # Controladores que manejan la lógica de las peticiones
-│   │   ├── cart.controller.js
-│   │   ├── product.controller.js
-│   │   └── user.controller.js
 │   ├── dao/                # Data Access Objects para interactuar con la base de datos
-│   │   ├── carts.dao.js
-│   │   ├── products.dao.js
-│   │   └── users.dao.js
 │   ├── docs/               # Archivos de definición y documentación para Swagger YAML
 │   ├── dto/                # Data Transfer Objects para filtrado de datos expuestos
 │   ├── middlewares/        # Middlewares de control de acceso, autenticación y sesión
 │   ├── models/             # Esquemas y modelos de datos de Mongoose
-│   │   ├── Cart.js
-│   │   ├── Product.js
-│   │   ├── Ticket.js
-│   │   └── User.model.js
 │   ├── repositories/       # Capa de abstracción sobre el acceso a datos (Patrón Repository)
 │   ├── routes/             # Enrutadores divididos en vistas de frontend (Handlebars) y API REST
 │   │   ├── api/            # Endpoints REST (sessions, users, adoptions, etc.)
@@ -44,6 +35,7 @@ backend-preentrega/
 ├── tests/                  # Suite de pruebas unitarias y de integración (Jest / Supertest)
 ├── Dockerfile              # Archivo de definición para la construcción de la imagen de producción
 ├── package.json            # Configuración de dependencias y scripts de ejecución
+├── FIRE_TEST_REPORT.md     # Reporte detallado de prueba de Docker
 └── README.md               # Documentación general del proyecto
 ```
 
@@ -53,6 +45,7 @@ backend-preentrega/
 
 La aplicación está organizada bajo principios de diseño escalables y separación de responsabilidades:
 
+- **`src/config/env.js`**: Centraliza todas las variables de entorno en un solo lugar. Cada propiedad tiene un valor por defecto seguro, evitando que la aplicación falle si falta alguna variable en el entorno. Las variables se importan como `import { env } from "./config/env.js"` en lugar de usar `process.env` directamente.
 - **`src/config/`**: Centraliza la inicialización de recursos clave, como la conexión de la base de datos de MongoDB Atlas y la seguridad mediante Passport.
 - **`src/controllers/`**: Se encargan exclusivamente de recibir las peticiones HTTP (req) de los clientes, procesar los parámetros básicos y estructurar las respuestas (res) que se enviarán de vuelta.
 - **`src/services/`**: Contienen toda la lógica de negocio del sistema (por ejemplo, validaciones avanzadas, envío de correos o procesamiento de carritos de compras). No interactúan directamente con la base de datos.
@@ -64,91 +57,192 @@ La aplicación está organizada bajo principios de diseño escalables y separaci
 
 ---
 
-## 🐳 Instrucciones de Docker
+## 🧪 Tests Funcionales
 
-El proyecto está preparado para ejecutarse dentro de un entorno aislado utilizando contenedores de Docker. Se utiliza una construcción optimizada en múltiples etapas (multi-stage build) para mantener la imagen final ligera y segura.
+La aplicación cuenta con **14 tests** automatizados que cubren:
 
-### 1. Construir la Imagen de Docker
+### Tests de `processData` (5 tests)
+Evalúan la función de transformación de datos en diferentes modos:
+- **UPPERCASE**: Transforma el input a mayúsculas
+- **LOWERCASE**: Transforma el input a minúsculas
+- **REVERSE**: Invierte el string
+- **Undefined/Inválido**: Devuelve el input sin cambios
 
-Asegúrate de estar en el directorio raíz donde se encuentra el archivo `Dockerfile`. Ejecuta el siguiente comando para compilar la imagen:
+### Tests de `adoption.router.js` (9 tests)
+Cubren todos los endpoints del router de adopciones usando **mocks** para aislar el worker externo:
+- **GET /adoptions**: Lista vacía inicial y después de crear una adopción
+- **POST /adoptions**: Creación exitosa, validación de campos faltantes (400), worker rejection, error del worker
+- **GET /adoptions/:id**: Búsqueda por ID y 404 para ID inexistente
 
-```bash
-docker build -t adoption-api:1.0 .
+### Evidencia de Tests
+
+```
+Test Suites: 2 passed, 2 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        1.344 s
 ```
 
-*Nota: Esto instalará solo las dependencias de producción y creará una imagen limpia basada en Alpine Linux.*
+### Cobertura de Código
 
-### 2. Ejecutar el Contenedor con Variables de Entorno
-
-Una vez compilada la imagen, puedes levantar el contenedor pasando las variables de entorno definidas en tu archivo `.env`. Ejecuta el siguiente comando:
-
-```bash
-docker run -d --name adoption-container -p 8081:8080 --env-file .env adoption-api:1.0
 ```
-
-Este comando:
-- Ejecuta el contenedor en segundo plano (`-d`).
-- Le asigna el nombre `adoption-container`.
-- Mapea el puerto local `8081` al puerto interno del contenedor `8080` (`-p 8081:8080`).
-- Carga las credenciales y configuraciones directamente desde el archivo `.env` (`--env-file .env`).
-
-### 3. Verificar el Funcionamiento
-
-Puedes verificar que el contenedor se está ejecutando correctamente con:
-
-```bash
-docker ps
-```
-
-Y revisar los registros de arranque del servidor utilizando:
-
-```bash
-docker logs adoption-container
+---------------------|---------|----------|---------|---------|-------------------
+File                 | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+---------------------|---------|----------|---------|---------|-------------------
+All files            |   97.95 |    81.81 |     100 |   97.91 |
+ src                 |     100 |      100 |     100 |     100 |
+  processData.js     |     100 |      100 |     100 |     100 |
+ src/config          |     100 |    76.66 |     100 |     100 |
+  env.js             |     100 |    76.66 |     100 |     100 |
+ src/routes          |   97.29 |       90 |     100 |   97.22 |
+  adoption.router.js |   97.29 |       90 |     100 |   97.22 |
+---------------------|---------|----------|---------|---------|-------------------
 ```
 
 ---
 
-## 🧪 Ejecutar la Suite de Pruebas (Tests)
+## 🐳 Dockerización
 
-La aplicación cuenta con pruebas automatizadas integradas para validar la robustez del código.
+### Dockerfile Optimizado
 
-### Requisitos Previos
+Se utiliza una construcción **multi-stage** para mantener la imagen final ligera y segura:
 
-Asegúrate de tener instaladas las dependencias de desarrollo localmente:
+```dockerfile
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci --only=production
+
+
+FROM node:22-alpine
+
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+COPY --from=builder /app/node_modules ./node_modules
+
+COPY package*.json ./
+
+COPY src ./src
+
+COPY public ./public
+
+EXPOSE 8080
+
+CMD ["node", "src/server.js"]
+```
+
+**Decisiones de optimización:**
+- **Multi-stage build**: Reduce el tamaño de la imagen final al separar la construcción de la ejecución
+- **`node:22-alpine`**: Imagen base liviana (~50MB) con todas las herramientas necesarias
+- **`npm ci --only=production`**: Instala solo dependencias de producción, más rápido y predecible que `npm install`
+- **`COPY src ./src` + `COPY public ./public`**: Copia solo lo necesario, evitando archivos de desarrollo y configuración local
+- **`CMD ["node", "src/server.js"]`**: Arranque directo sin overhead de npm
+
+### Log de Construcción
+
+```
+[+] Building 48.6s (14/14) FINISHED
+ => [internal] load build definition from Dockerfile
+ => [internal] load metadata for docker.io/library/node:22-alpine
+ => [builder 4/4] RUN npm ci --only=production  13.4s
+ => [stage-1 5/6] COPY src ./src
+ => [stage-1 6/6] COPY public ./public
+ => exporting to image
+ => => naming to docker.io/library/backend-preentrega:v2
+```
+
+### Ejecución del Contenedor
 
 ```bash
+docker run --rm -p 8080:8080 --env-file .env backend-preentrega:v2
+```
+
+### Logs de Inicio
+
+```
+Servidor escuchando en http://localhost:8080
+Conexión exitosa a MongoDB.
+```
+
+---
+
+## 🚀 Deploy en Railway
+
+La aplicación está desplegada en **Railway** y accesible públicamente.
+
+### Variables de Entorno Configuradas en Railway
+
+| Variable | Valor |
+|---|---|
+| `MONGO_URI` | URI de MongoDB Atlas |
+| `JWT_SECRET` | Secreto JWT |
+| `SESSION_SECRET` | Secreto de sesión |
+
+### Documentación de la API (Swagger)
+
+Una vez desplegada, la documentación interactiva de Swagger está disponible en:
+
+👉 **`https://[tu-app].railway.app/api-docs`**
+
+---
+
+## 🔧 Instrucciones para Ejecutar Localmente
+
+### Prerrequisitos
+- Node.js 22+
+- MongoDB (local o Atlas)
+- Docker (opcional)
+
+### Instalación
+
+```bash
+cd backend-preentrega
 npm install
 ```
 
-### Ejecutar los Tests de Integración
+### Variables de Entorno
 
-Para correr las pruebas implementadas (por ejemplo, usando Mocha/Chai o Jest), ejecuta el siguiente comando en la consola:
+Crear un archivo `.env` en `backend-preentrega/` con:
+
+```env
+MONGO_URI=mongodb+srv://usuario:password@cluster.mongodb.net/mi-db
+JWT_SECRET=mi-secreto
+SESSION_SECRET=mi-secreto-sesion
+```
+
+### Ejecutar en Desarrollo
+
+```bash
+npm run dev
+```
+
+### Ejecutar Tests
 
 ```bash
 npm test
 ```
 
-Este comando levantará el entorno de pruebas, ejecutará los assertions y te dará un reporte en consola detallando el estado de cada test.
+### Construir y Ejecutar con Docker
+
+```bash
+docker build -t backend-preentrega:v1 .
+docker run --rm -p 8080:8080 --env-file .env backend-preentrega:v1
+```
 
 ---
 
-## 🚀 Repositorio de DockerHub & Logs de Ejecución
+## 📂 Repositorio
 
-A continuación, se adjuntan los accesos al contenedor distribuido y la evidencia del funcionamiento local:
+El código fuente completo está disponible en GitHub:
+👉 **[https://github.com/santiagosole93/proyecto-backend1](https://github.com/santiagosole93/proyecto-backend1)**
 
-### Imagen Oficial en DockerHub
-👉 **`santiagosole93/adoption-api:1.0`**
+---
 
-Para descargar y ejecutar esta imagen directamente desde tu terminal, utilizá el siguiente comando:
-```bash
-docker pull santiagosole93/adoption-api:1.0
-```
+## 📄 Licencia
 
-### Capturas de Pantalla y Evidencias de Ejecución
-
-#### 1. Construcción Exitosa de la Imagen (Docker Build)
-<img width="1535" height="52" alt="Captura de pantalla 2026-06-22 213806" src="https://github.com/user-attachments/assets/1463f7fa-91d4-4356-8213-d4efbb1cb0d1" />
-
-#### 2. Inicio Exitoso del Contenedor y Conexión a Base de Datos (Docker Run & Logs)
-<img width="1102" height="142" alt="Captura de pantalla 2026-06-22 214253" src="https://github.com/user-attachments/assets/f0ee81e2-2a25-414c-8cb1-0858d7649ebb" />
-
+Este proyecto fue desarrollado con fines educativos como parte del curso de Backend de Coderhouse.
