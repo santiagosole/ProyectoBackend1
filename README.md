@@ -188,6 +188,7 @@ docker run --rm -p 8080:8080 --env-file .env santiagosole93/backend-preentrega:v
 ## 🚀 Deploy en Railway
 
 La aplicación está desplegada en **Railway** y accesible públicamente.
+https://proyectobackend1-production.up.railway.app/users/login
 
 ### Variables de Entorno Configuradas en Railway
 
@@ -253,9 +254,14 @@ docker run --rm -p 8080:8080 --env-file .env backend-preentrega:v1
 ## 📂 Repositorio
 
 El código fuente completo está disponible en GitHub:
-👉 **[https://github.com/santiagosole/ProyectoBackend1/tree/main](https://github.com/santiagosole/ProyectoBackend1/tree/main)**
+👉 https://github.com/santiagosole/ProyectoBackend1/tree/main
 
 ---
+
+## 📄 Link Google Docs
+https://docs.google.com/document/d/1w5488xKKMeIM3M9HYup2hfF1lb_rgSsCWsaDDakrInQ/edit?tab=t.0
+
+
 
 ## 📄 Licencia
 
