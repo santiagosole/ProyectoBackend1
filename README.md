@@ -35,7 +35,6 @@ backend-preentrega/
 ├── tests/                  # Suite de pruebas unitarias y de integración (Jest / Supertest)
 ├── Dockerfile              # Archivo de definición para la construcción de la imagen de producción
 ├── package.json            # Configuración de dependencias y scripts de ejecución
-├── FIRE_TEST_REPORT.md     # Reporte detallado de prueba de Docker
 └── README.md               # Documentación general del proyecto
 ```
 
@@ -171,6 +170,21 @@ Conexión exitosa a MongoDB.
 
 ---
 
+## 📦 Imagen en DockerHub
+
+La imagen Docker está disponible públicamente en DockerHub:
+
+**Repositorio:** 👉 **[santiagosole93/backend-preentrega](https://hub.docker.com/r/santiagosole93/backend-preentrega)**
+
+Para descargar y ejecutar la imagen directamente:
+
+```bash
+docker pull santiagosole93/backend-preentrega:v1
+docker run --rm -p 8080:8080 --env-file .env santiagosole93/backend-preentrega:v1
+```
+
+---
+
 ## 🚀 Deploy en Railway
 
 La aplicación está desplegada en **Railway** y accesible públicamente.
@@ -187,7 +201,7 @@ La aplicación está desplegada en **Railway** y accesible públicamente.
 
 Una vez desplegada, la documentación interactiva de Swagger está disponible en:
 
-👉 **`https://[tu-app].railway.app/api-docs`**
+👉 **https://proyectobackend1-production.up.railway.app/api-docs**
 
 ---
 
@@ -239,7 +253,7 @@ docker run --rm -p 8080:8080 --env-file .env backend-preentrega:v1
 ## 📂 Repositorio
 
 El código fuente completo está disponible en GitHub:
-👉 **[https://github.com/santiagosole93/proyecto-backend1](https://github.com/santiagosole93/proyecto-backend1)**
+👉 **[https://github.com/santiagosole/ProyectoBackend1/tree/main](https://github.com/santiagosole/ProyectoBackend1/tree/main)**
 
 ---
 
